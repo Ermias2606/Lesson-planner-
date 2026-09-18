@@ -2,9 +2,9 @@ import { CurriculumWeek, SchoolInfo } from '../types';
 
 export const initialSchoolInfo: SchoolInfo = {
   schoolName: {
-    om: 'Mana Barumsaa Sadarkaa 1ffaa fi Giddu-galeessaa Salaayish',
-    am: 'ሳላይሽ ቅድመ አንደኛ፣ 1ኛ ደረጃና መካከለኛ ደረጃ ትምህርት ቤት',
-    en: 'Salayish Pre-primary, Primary and Middle School'
+    om: 'Mana Barumsaa Sadarkaa 1ffaa fi Giddu-galeessaa',
+    am: 'የመጀመሪያና መካከለኛ ደረጃ ትምህርት ቤት',
+    en: 'Primary and Middle School'
   },
   academicYear: {
     om: '2019 A.L.I (2026/27)',
@@ -54,44 +54,44 @@ const RAW_CURRICULUM_2016: CurriculumWeek[] = [
     monthIndex: 0,
     weekNumber: 1,
     dateRange: '02 - 04 (3)',
-    pages: '1 - 2',
+    pages: '1 - 3',
     chapterNumber: 1,
     monthName: { om: 'Fulbaana', am: 'መስከረም', en: 'Meskerem (Sep)' },
     chapter: { om: 'Boqonnaa 1', am: 'ምዕራፍ 1', en: 'Chapter 1' },
     mainTopic: {
-      om: '1.0 Qophii, Seensa fi Qajeelfama Barnoota Herregaa Kutaa 5ffaa',
-      am: '1.0 የ5ኛ ክፍል ሒሳብ ትምህርት መግቢያ፣ ቅድመ ዝግጅትና መመሪያ',
-      en: '1.0 Introduction, Preparation & Orientation for Grade 5 Math'
+      om: '1.1 Yaada Waliigalaafi Bu’uureessa Guddina Paatarnootaa',
+      am: '1.1 የፓተርን እድገት አጠቃላይ ሃሳብና መሰረት',
+      en: '1.1 General Concept and Foundation of Pattern Development'
     },
     generalObjectives: {
-      om: 'Silabasii fi heera barnoota herregaa kutaa 5ffaa hubatanii qophii gochuu.',
-      am: 'የ5ኛ ክፍል ሒሳብ ትምህርት ሥርዓተ-ትምህርትንና ደንቦችን ተረድተው መዘጋጀት።',
-      en: 'Understand Grade 5 syllabus, class rules and prepare materials.'
+      om: 'Lakkoofsonni yommuu tarreeffaman lakkoofsa jalqabaa irraa lakkoofsi itti aanu akkamitti akka argamu ibsuu.',
+      am: 'ቁጥሮች ሲዘረዘሩ ከቀጣይ ቁጥሮች ጋር ያለውን ግንኙነትና የፓተርን እድገት መረዳት።',
+      en: 'Understand how numbers are sequenced and how to find the next term in patterns.'
     },
     priorKnowledge: {
-      om: 'Barnoota herregaa kutaa 4ffaa irraa beekumsa bu\'uuraa qabu.',
-      am: 'ከ4ኛ ክፍል የሒሳብ ትምህርት መሠረታዊ እውቀት አላቸው።',
-      en: 'Foundational knowledge from Grade 4 mathematics.'
+      om: 'Barnoota herregaa kutaa 4ffaa irraa beekumsa lakkoofsaa fi tarree bu\'uuraa qabu.',
+      am: 'ከ4ኛ ክፍል የቁጥር ቅደም ተከተል መሰረታዊ እውቀት አላቸው።',
+      en: 'Basic number sequencing knowledge from Grade 4.'
     },
     lessonOutcome: {
-      om: 'Barattoonni meeshaalee barnootaa qopheeffatanii seera daree baru.',
-      am: 'ተማሪዎች የመማሪያ ቁሳቁሶችን አዘጋጅተው የክፍል ደንቦችን ይገነዘባሉ።',
-      en: 'Students organize learning materials and master classroom expectations.'
+      om: 'Barattoonni paatarnii lakkoofsotaa adda baasanii fiduu fi guutuu ni danda\'u.',
+      am: 'ተማሪዎች የቁጥር ፓተርኖችን ለይተው ማወቅና ክፍት ቦታዎችን መሙላት ይችላሉ።',
+      en: 'Students can identify number patterns and complete missing terms.'
     },
     teachingMethod: {
-      om: 'Ibsa kennuu, marii daree, gaaffii fi deebii.',
-      am: 'ገለፃ፣ የክፍል ውይይት፣ ጥያቄና መልስ።',
-      en: 'Explanation, classroom discussion, question & answer.'
+      om: 'Ibsa kennuu, marii daree, gaaffii fi deebii, shaakala.',
+      am: 'ገለፃ፣ የክፍል ውይይት፣ ጥያቄና መልስ፣ ልምምድ።',
+      en: 'Explanation, classroom discussion, Q&A, practice.'
     },
     teachingAids: {
-      om: 'Kitaaba barataa, silabasii, gabatee gurraacha.',
-      am: 'የተማሪው መጽሐፍ፣ ሲላበስ፣ ጥቁር ሰሌዳ።',
-      en: 'Student textbook, syllabus guide, blackboard.'
+      om: 'Kitaaba barataa, gabatee gurraacha, kaardii lakkoofsaa.',
+      am: 'የተማሪው መጽሐፍ፣ ጥቁር ሰሌዳ፣ የቁጥር ካርዶች።',
+      en: 'Student textbook, blackboard, number cards.'
     },
     assessment: {
-      om: 'Hirmaannaa daree, hubannoo seera daree.',
-      am: 'የክፍል ተሳትፎ፣ የደንብ ግንዛቤ።',
-      en: 'Class participation and understanding of classroom norms.'
+      om: 'Hirmaannaa daree, Gilgaala 1.1.',
+      am: 'የክፍል ተሳትፎ፣ መልመጃ 1.1።',
+      en: 'Class participation, Exercise 1.1 evaluation.'
     }
   },
   {
@@ -100,44 +100,44 @@ const RAW_CURRICULUM_2016: CurriculumWeek[] = [
     monthIndex: 0,
     weekNumber: 2,
     dateRange: '07 - 11 (5)',
-    pages: '1 - 6',
+    pages: '3 - 9',
     chapterNumber: 1,
     monthName: { om: 'Fulbaana', am: 'መስከረም', en: 'Meskerem (Sep)' },
     chapter: { om: 'Boqonnaa 1', am: 'ምዕራፍ 1', en: 'Chapter 1' },
     mainTopic: {
-      om: '1.1 Bal\'ina dirra kaaree fi rog-afurii waraqaa fayyadamuun safaruu',
-      am: '1.1 የካሬና አራት ማዕዘን ስፋትን በካሬና አራት ማዕዘን ወረቀቶችን በመጠቀም ስፋትን መለካት',
-      en: '1.1 Measuring Area of Squares and Rectangles Using Grid Papers'
+      om: '1.2 Tarmootaafi Ibsamoota Aljebraa (Jijjiiramoota, Tarmoota, Maxxantoota)',
+      am: '1.2 የአልጀብራ ተርሞችና አገላለጾች (ተለዋዋጮች፣ ተርሞች፣ አባሪዎች)',
+      en: '1.2 Terms and Algebraic Expressions (Variables, Terms, Coefficients)'
     },
     generalObjectives: {
-      om: 'Bal\'ina dirra kaaree fi rog-afurii waraqaa kaaree fi rog-afuriitti fayyadamuun safaruu ni beeku.',
-      am: 'የካሬና አራት ማዕዘን ስፋትን በካሬና አራት ማዕዘን ወረቀቶችን በመጠቀም ስፋትን መለካት ያውቃሉ።',
-      en: 'Learn how to measure surface area of squares and rectangles with grid papers.'
+      om: 'Jijjiiramaa, tarmii aljebraafi ibsamoota aljebraa adda baasanii beekuu.',
+      am: 'ተለዋዋጮችን፣ የአልጀብራ ተርሞችንና አገላለጾችን መለየትና መረዳት።',
+      en: 'Identify variables, algebraic terms, and algebraic expressions.'
     },
     priorKnowledge: {
-      om: 'Barnoota herregaa kutaa 4ffaa irraa beekumsa safara bal\'inaa qabu.',
-      am: 'ከ4ኛ ክፍል የሒሳብ ትምህርት መጠነኛ እውቀት አላቸው።',
-      en: 'Prior understanding of basic measurements from Grade 4.'
+      om: 'Qoyyaboota bu\'uuraa herregaa fi lakkoofsota hinbeekamne bakka buusuu.',
+      am: 'መሰረታዊ የሂሳብ ስሌቶችና ያልታወቁ ቁጥሮችን በምልክት መወከል ከቀድሞው ማወቅ።',
+      en: 'Basic arithmetic and representing unknown quantities.'
     },
     lessonOutcome: {
-      om: 'Bal\'ina kaaree fi rog-afurii waraqaa kaaree fi rog-afuriitti fayyadamuun safaruu ni danda\'u.',
-      am: 'የካሬና አራት ማዕዘን ስፋትን በካሬና አራት ማዕዘን ወረቀቶችን በመጠቀም ስፋትን መለካት ይችላሉ።',
-      en: 'Students can measure areas of rectangles and squares accurately.'
+      om: 'Barattoonni ibsamoota aljebraa barreessuu fi tarmoota adda baasuu ni danda\'u.',
+      am: 'ተማሪዎች የአልጀብራ አገላለጾችን መጻፍና ተርሞችን መለየት ይችላሉ።',
+      en: 'Students can write algebraic expressions and identify terms and coefficients.'
     },
     teachingMethod: {
-      om: 'Ibsa kennuu, marii garee, gaaffii fi deebii, gabatee irratti agarsiisuu.',
-      am: 'በገለፃ፣ በውይይት፣ በጥያቄና መልስ፣ ሰሌዳ በማሳየት።',
-      en: 'Explanation, group discussion, Q&A, demonstration on board.'
+      om: 'Ibsa, fakkeenya kennuu, marii garee, Gilgaala 1.2 fi 1.3.',
+      am: 'ገለፃ፣ ምሳሌ መስጠት፣ የቡድን ውይይት፣ መልመጃ 1.2 እና 1.3።',
+      en: 'Instruction, examples, group discussion, Exercises 1.2 & 1.3.'
     },
     teachingAids: {
-      om: 'Waraqaa kaaree fi rog-afurii, sarartuu, qalama.',
-      am: 'ማስመሪያ እና ሜትር፣ ካሬ ወረቀት።',
-      en: 'Ruler, grid papers, square sheets, pencils.'
+      om: 'Kitaaba barataa, gabatee gurraacha.',
+      am: 'የተማሪው መጽሐፍ፣ ጥቁር ሰሌዳ።',
+      en: 'Student textbook, blackboard.'
     },
     assessment: {
-      om: 'Hojii daree, Hojii manaa, Hojii garee, Hojii pirojektii.',
-      am: 'የክፍል ሥራ፣ የቤት ሥራ፣ አጠቃላይ/የቡድን ሥራ፣ የፕሮጀክት ሥራ።',
-      en: 'Classwork, homework, group assignment, project work.'
+      om: 'Hojii daree, Gilgaala 1.2, Gilgaala 1.3.',
+      am: 'የክፍል ሥራ፣ መልመጃ 1.2፣ መልመጃ 1.3።',
+      en: 'Class work, Exercise 1.2 and Exercise 1.3.'
     }
   },
   {
@@ -146,44 +146,44 @@ const RAW_CURRICULUM_2016: CurriculumWeek[] = [
     monthIndex: 0,
     weekNumber: 3,
     dateRange: '14 - 18 (3)',
-    pages: '6 - 9',
+    pages: '9 - 11',
     chapterNumber: 1,
     monthName: { om: 'Fulbaana', am: 'መስከረም', en: 'Meskerem (Sep)' },
     chapter: { om: 'Boqonnaa 1', am: 'ምዕራፍ 1', en: 'Chapter 1' },
     mainTopic: {
-      om: '1.2 Bal\'ina dirraa sm², m² fi hektaaraan safaruu',
-      am: '1.2 የወለል ስፋትን በሳ.ሜ²፣ ሜ² እና በሄክታር መለካት',
-      en: '1.2 Measuring Surface Area in cm², m², and Hectares'
+      om: '1.3 Himoota Walqixaa Sararaawaa Bakka Buusuun Furuu',
+      am: '1.3 ቀጥተኛ መስመር እኩልታዎችን በመተካት መፍታት',
+      en: '1.3 Solving Linear Equations by Substitution'
     },
     generalObjectives: {
-      om: 'Bal\'ina dirraa sm², m² fi hektaaraan shallaganii safaruu ni beeku.',
-      am: 'የወለል ስፋትን በሳ.ሜ²፣ ሜ² እና በሄክታር መለካት ያውቃሉ።',
-      en: 'Understand how to calculate surface areas in cm², m², and hectares.'
+      om: 'Ibsamoota aljebraa keessatti bakka jijjiiramaa lakkoofsa buusuun shallaguu ni beeku.',
+      am: 'በአልጀብራ አገላለጾች ውስጥ ተለዋዋጭን በቁጥር በመተካት ማስላት ያውቃሉ።',
+      en: 'Evaluate algebraic expressions by substituting values for variables.'
     },
     priorKnowledge: {
-      om: 'Safartuuwwan dheerinaa fi bal\'inaa kutaa 4ffaa irraa beeku.',
-      am: 'የርዝመት መለኪያዎችን ከ4ኛ ክፍል ያውቃሉ።',
-      en: 'Length units and basic measurements from Grade 4.'
+      om: 'Qoyyaboota lakkoofsaa afran.',
+      am: 'አራቱ መሰረታዊ የሂሳብ ስሌቶች።',
+      en: 'Four fundamental arithmetic operations.'
     },
     lessonOutcome: {
-      om: 'Bal\'ina dirraa safartuulee sm², m² fi hektaaraan safaruu ni danda\'u.',
-      am: 'የወለል ስፋትን በሳ.ሜ²፣ ሜ² እና በሄክታር መለካት ይችላሉ።',
-      en: 'Students calculate and represent areas in standard metric units.'
+      om: 'Barattoonni gatii jijjiiramaa kennaman bakka buusuun shallaggii ni raawwatu.',
+      am: 'ተማሪዎች የተሰጠውን ተለዋዋጭ ዋጋ በመተካት ስሌቶችን ማከናወን ይችላሉ።',
+      en: 'Students compute expression values by substituting given parameters.'
     },
     teachingMethod: {
-      om: 'Ibsa dhiyeessuu, marii garee, gaaffii fi deebii, gabatee irratti.',
-      am: 'በገለፃ፣ በውይይት፣ በጥያቄና መልስ፣ ሰሌዳ በማሳየት።',
-      en: 'Lecture, group interaction, practical problem solving.'
+      om: 'Ibsa, fakkeenya irratti mari\'achuu, Gilgaala 1.4 fi 1.5.',
+      am: 'ገለፃ፣ በምሳሌዎች ላይ መወያየት፣ መልመጃ 1.4 እና 1.5።',
+      en: 'Lecture, example walkthrough, Exercises 1.4 & 1.5.'
     },
     teachingAids: {
-      om: 'Sarartuu, meetira, gabatee gurraacha.',
-      am: 'ማስመሪያ እና ሜትር።',
-      en: 'Ruler, measuring tape, board.'
+      om: 'Kitaaba barataa, gabatee gurraacha.',
+      am: 'የተማሪው መጽሐፍ፣ ጥቁር ሰሌዳ።',
+      en: 'Student textbook, blackboard.'
     },
     assessment: {
-      om: 'Hojii daree, Hojii manaa, Hojii garee, Qorumsa yaalii.',
-      am: 'የክፍል ሥራ፣ የቤት ሥራ፣ አጠቃላይ/የቡድን ሥራ፣ የሙከራ ፈተና።',
-      en: 'Class exercise, homework, quizzes.'
+      om: 'Hojii daree, Gilgaala 1.5.',
+      am: 'የክፍል ሥራ፣ መልመጃ 1.5።',
+      en: 'Class work, Exercise 1.5 evaluation.'
     }
   },
   {
@@ -192,44 +192,44 @@ const RAW_CURRICULUM_2016: CurriculumWeek[] = [
     monthIndex: 0,
     weekNumber: 4,
     dateRange: '21 - 25 (5)',
-    pages: '9 - 13',
+    pages: '11 - 13',
     chapterNumber: 1,
     monthName: { om: 'Fulbaana', am: 'መስከረም', en: 'Meskerem (Sep)' },
     chapter: { om: 'Boqonnaa 1', am: 'ምዕራፍ 1', en: 'Chapter 1' },
     mainTopic: {
-      om: '1.3 Qabiyyee baattuu mm³, cm³ fi liitiraan safaruu',
-      am: '1.3 ይዘትን በሳ.ሜ³፣ ሜ³ እና በሊትር መለካት',
-      en: '1.3 Measuring Volume and Capacity in mm³, cm³, and Liters'
+      om: '1.4 Himoota Walqixaa Sararaawaa Furuu (maddaala hangaa fi seera)',
+      am: '1.4 ቀጥተኛ መስመር እኩልታዎችን መፍታት (የሚዛን መርህ)',
+      en: '1.4 Solving Linear Equations (Balance Model & Properties)'
     },
     generalObjectives: {
-      om: 'Qabiyyee baattuu mm³, cm³ fi liitiraan shallaguu fi safaruu ni beeku.',
-      am: 'ይዘትን በሳ.ሜ³፣ ሜ³ እና በሊትር መለካት ያውቃሉ።',
-      en: 'Master volume calculations using cubic centimeters and liters.'
+      om: 'Himoota walqixaa sararaawaa bifa x + a = b tiin jiran madaala hangaatti fayyadamuun furuu.',
+      am: 'እኩልታዎችን በሚዛን መርህና ተቃራኒ ስሌት በመጠቀም መፍታት።',
+      en: 'Solve linear equations using balance scales and inverse operations.'
     },
     priorKnowledge: {
-      om: 'Bishaan fi dhangala\'aa safaruu irratti naannoo irraa beekumsa qabu.',
-      am: 'ስለ ፈሳሽ መለኪያዎች ከዕለት ተዕለት ኑሮ እውቀት አላቸው።',
-      en: 'Familiarity with liquid measurements from daily life.'
+      om: 'Walqixxaattoo fi lakkoofsa hinbeekamne.',
+      am: 'እኩልታና ያልታወቁ ቁጥሮች ጽንሰ-ሀሳብ።',
+      en: 'Basic equations and unknown number concepts.'
     },
     lessonOutcome: {
-      om: 'Qabiyyee baattuu mm³, cm³ fi liitiraan shallaguu ni baru.',
-      am: 'ይዘትን በሳ.ሜ³፣ ሜ³ እና በሊትር መለካት ይማራሉ።',
-      en: 'Students can determine capacity and volume in metric units.'
+      om: 'Barattoonni himoota walqixaa sararaawaa salphaa furuu ni danda\'u.',
+      am: 'ተማሪዎች ቀለል ያሉ ቀጥተኛ እኩልታዎችን መፍታት ይችላሉ።',
+      en: 'Students successfully solve simple linear equations for unknown variables.'
     },
     teachingMethod: {
-      om: 'Ibsa kennuu, marii, gaaffii fi deebii, gabatee irratti hojjechuu.',
-      am: 'በገለፃ፣ በውይይት፣ በጥያቄና መልስ፣ ሰሌዳ በማሳየት።',
-      en: 'Demonstration, guided exercises, interactive questions.'
+      om: 'Ibsa, fakkeenya madaala hangaa, Gilgaala 1.6.',
+      am: 'ገለፃ፣ የሚዛን ምሳሌዎችን ማሳየት፣ መልመጃ 1.6።',
+      en: 'Demonstration with balance model, Exercise 1.6.'
     },
     teachingAids: {
-      om: 'Mi\'a liitiraa, meetira, ujummoo safaraa.',
-      am: 'ሊትር እና ሜትር፣ የውሃ መያዣ እቃዎች።',
-      en: 'Liter containers, measuring cups, measuring tape.'
+      om: 'Kitaaba barataa, fakkeenya madaala hangaa.',
+      am: 'የተማሪው መጽሐፍ፣ የሚዛን ስዕላዊ መግለጫ።',
+      en: 'Student textbook, balance scale illustrations.'
     },
     assessment: {
-      om: 'Hojii daree, Hojii manaa, Hojii garee, Pirojektii.',
-      am: 'የክፍል ሥራ፣ የቤት ሥራ፣ አጠቃላይ/የቡድን ሥራ፣ የፕሮጀክት ሥራ።',
-      en: 'Practical exercises, homework, group project.'
+      om: 'Hojii daree, Gilgaala 1.6.',
+      am: 'የክፍል ሥራ፣ መልመጃ 1.6።',
+      en: 'Classwork, Exercise 1.6.'
     }
   },
   {
@@ -238,44 +238,44 @@ const RAW_CURRICULUM_2016: CurriculumWeek[] = [
     monthIndex: 0,
     weekNumber: 5,
     dateRange: '28 - 02 (5)',
-    pages: '13 - 18',
+    pages: '13 - 17',
     chapterNumber: 1,
     monthName: { om: 'Fulbaana', am: 'መስከረም', en: 'Meskerem (Sep)' },
     chapter: { om: 'Boqonnaa 1', am: 'ምዕራፍ 1', en: 'Chapter 1' },
     mainTopic: {
-      om: '1.4 Safartuulee bal\'inaa fi qabiyyee gara tokko gara biraatti jijjiiruu',
-      am: '1.4 የስፋትና የይዘት መለኪያ ምድቦችን ወደተለያዩ ምድብ መቀየር',
-      en: '1.4 Unit Conversion for Area and Volume Measurements'
+      om: '1.5 Hojiirra Oolmaa Himoota Walqixaa Sararaawaa (Pirobileemota Jechaa)',
+      am: '1.5 ቀጥተኛ እኩልታዎችን በዕለት ተዕለት ኑሮ መተግበር (የቃል ችግሮች)',
+      en: '1.5 Application of Linear Equations (Word Problems)'
     },
     generalObjectives: {
-      om: 'Safartuulee bal\'inaa fi qabiyyee jijjiiruu ni beeku (mm²<->cm²<->m²<->km², mm³<->cm³<->liitira).',
-      am: 'የስፋትና የይዘት መለኪያ ምድቦችን ወደተለያዩ ምድብ መቀየር ያውቃሉ።',
-      en: 'Convert between area and volume units smoothly.'
+      om: 'Pirobileemota jechaa gara hima walqixaatti jijjiiruun hiikuu.',
+      am: 'የቃል ችግሮችን ወደ እኩልታ በመቀየር መፍታት።',
+      en: 'Translate word problems into linear equations and solve them.'
     },
     priorKnowledge: {
-      om: 'Baay\'isuu fi hiruu herrega kutaa 4ffaa irraa beeku.',
-      am: 'ማባዛትና ማካፈል ከ4ኛ ክፍል ያውቃሉ።',
-      en: 'Multiplication and division skills from Grade 4.'
+      om: 'Furuu himoota walqixaa sararaawaa torban darbe baratan.',
+      am: 'ያለፈው ሳምንት የእኩልታ አፈታት እውቀት።',
+      en: 'Solving linear equations from previous week.'
     },
     lessonOutcome: {
-      om: 'Safartuulee bal\'inaa fi qabiyyee gara kutaa barbaadamutti ni jijjiiru.',
-      am: 'የስፋትና የይዘት መለኪያዎችን ወደሚፈለገው ምድብ ይቀይራሉ።',
-      en: 'Students accurately convert measurement units.'
+      om: 'Barattoonni pirobileemota jiruufi jireenyaa furan.',
+      am: 'ተማሪዎች የዕለት ተዕለት የኑሮ ችግሮችን በእኩልታ ይፈታሉ።',
+      en: 'Students solve practical everyday word problems using equations.'
     },
     teachingMethod: {
-      om: 'Ibsa, marii, gaaffii fi deebii, shaakala dhuunfaa.',
-      am: 'በገለፃ፣ በውይይት፣ በጥያቄና መልስ፣ በግል ልምምድ።',
-      en: 'Direct instruction, conversion charts, drill exercises.'
+      om: 'Ibsa, marii garee, Gilgaala 1.7.',
+      am: 'ገለፃ፣ የቡድን ውይይት፣ መልመጃ 1.7።',
+      en: 'Instruction, collaborative group work, Exercise 1.7.'
     },
     teachingAids: {
-      om: 'Chaartii jijjiirraa safartuulee, meetira, sarartuu.',
-      am: 'የመለኪያ ምድቦች መቀየሪያ ቻርት፣ ሜትር።',
-      en: 'Metric conversion chart, ruler, formula tables.'
+      om: 'Kitaaba barataa, gabatee gurraacha.',
+      am: 'የተማሪው መጽሐፍ፣ ጥቁር ሰሌዳ።',
+      en: 'Student textbook, blackboard.'
     },
     assessment: {
-      om: 'Hojii daree, Hojii manaa, Hojii garee, Hojii pirojektii.',
-      am: 'የክፍል ሥራ፣ የቤት ሥራ፣ አጠቃላይ/የቡድን ሥራ፣ የፕሮጀክት ሥራ።',
-      en: 'Classwork, homework, individual tests.'
+      om: 'Hojii daree, Gilgaala 1.7, Cuunfaa Boqonnaa 1.',
+      am: 'የክፍል ሥራ፣ መልመጃ 1.7፣ ምዕራፍ 1 ማጠቃለያ።',
+      en: 'Classwork, Exercise 1.7, Chapter 1 Review.'
     }
   },
 
@@ -286,44 +286,44 @@ const RAW_CURRICULUM_2016: CurriculumWeek[] = [
     monthIndex: 1,
     weekNumber: 1,
     dateRange: '05 - 09 (5)',
-    pages: '18 - 25',
-    chapterNumber: 1,
+    pages: '18 - 26',
+    chapterNumber: 2,
     monthName: { om: 'Onkololeessa', am: 'ጥቅምት', en: 'Tikimt (Oct)' },
-    chapter: { om: 'Boqonnaa 1', am: 'ምዕራፍ 1', en: 'Chapter 1' },
+    chapter: { om: 'Boqonnaa 2', am: 'ምዕራፍ 2', en: 'Chapter 2' },
     mainTopic: {
-      om: '1.5 Gilgaalota bal\'inaa fi qabiyyee irratti hundaa\'an hojjechuu',
-      am: '1.5 ስፋትና ይዘትን መሰረት ያደረጉ መልመጃዎችን መሥራት',
-      en: '1.5 Practical Exercises & Problem Solving in Area and Volume'
+      om: '2.1 Akaakuu Firaakshinootaa (Sirrii, Sirrii hintaane, Makaa) fi Walgitumsa',
+      am: '2.1 የክፍልፋይ አይነቶች (ትክክለኛ፣ ኢ-ትክክለኛ፣ ድብልቅ) እና ተመጣጣኝ ክፍልፋዮች',
+      en: '2.1 Types of Fractions (Proper, Improper, Mixed) and Equivalent Fractions'
     },
     generalObjectives: {
-      om: 'Gilgaalota bal\'inaa fi qabiyyee irratti hundaa\'an adda baasanii hojjechuu ni beeku.',
-      am: 'ስፋትና ይዘትን መሰረት ያደረጉ መልመጃዎችን መሥራት ያውቃሉ።',
-      en: 'Solve word problems involving area and volume in real-life contexts.'
+      om: 'Firaakshinoota sirrii, sirrii hintaaneefi makaa adda baasuu, akkasumas firaakshinoota walgitaa argachuu.',
+      am: 'ትክክለኛ፣ ኢ-ትክክለኛ እና ድብልቅ ክፍልፋዮችን መለየትና ተመጣጣኝ ክፍልፋዮችን መፈለግ።',
+      en: 'Identify proper, improper, and mixed fractions and find equivalent fractions.'
     },
     priorKnowledge: {
-      om: 'Barnoota bal\'inaa fi qabiyyee torbanoota darban barataniiru.',
-      am: 'ባለፉት ሳምንታት የተማሩትን የስፋትና ይዘት እውቀት።',
-      en: 'Concepts covered in previous weeks.'
+      om: 'Maalummaa firaakshinii kutaa 4ffaa.',
+      am: 'የክፍልፋይ ጽንሰ-ሀሳብ ከ4ኛ ክፍል።',
+      en: 'Basic fraction concept from Grade 4.'
     },
     lessonOutcome: {
-      om: 'Gilgaalota bal\'inaa fi qabiyyee jireenya guyyaa guyyaa keessatti hojiirra oolchuu danda\'u.',
-      am: 'ስፋትና ይዘትን መሰረት ያደረጉ መልመጃዎችን መሥራት ይችላሉ።',
-      en: 'Apply calculations to solve daily life physical scenarios.'
+      om: 'Barattoonni akaakuu firaakshinii adda baasuu fi gara akaakuu birootti jijjiiruu ni danda\'u.',
+      am: 'ተማሪዎች የክፍልፋይ አይነቶችን ለይተው ማወቅና መቀየር ይችላሉ።',
+      en: 'Students classify fractions and convert between mixed and improper forms.'
     },
     teachingMethod: {
-      om: 'Ibsa, marii garee, gaaffii fi deebii, gabatee irratti.',
-      am: 'በገለፃ፣ በውይይት፣ በጥያቄና መልስ፣ ሰሌዳ በማሳየት።',
-      en: 'Interactive problem solving, peer discussion, board exercises.'
+      om: 'Ibsa, moodeela fayyadamuun agarsiisuu, Gilgaala 2.1 fi 2.2.',
+      am: 'ገለፃ፣ ሞዴሎችን በመጠቀም ማሳየት፣ መልመጃ 2.1 እና 2.2።',
+      en: 'Explanation, model demonstration, Exercises 2.1 & 2.2.'
     },
     teachingAids: {
-      om: 'Meetira, liitira, bocoota jajjaboo.',
-      am: 'ሜትር እና ሊትር፣ ጠጣር ቅርጾች።',
-      en: 'Measuring tape, liter jars, 3D geometric shapes.'
+      om: 'Waraqaa qoqqoodame, kaardii firaakshinii, gabatee.',
+      am: 'የተቆረጡ ወረቀቶች፣ የክፍልፋይ ካርዶች።',
+      en: 'Fraction strips, flash cards, blackboard.'
     },
     assessment: {
-      om: 'Hojii daree, Hojii manaa, Hojii garee, Pirojektii.',
-      am: 'የክፍል ሥራ፣ የቤት ሥራ፣ አጠቃላይ/የቡድን ሥራ፣ የፕሮጀክት ሥራ።',
-      en: 'Class problems, group quiz, home assignment.'
+      om: 'Hojii daree, Gilgaala 2.1, Gilgaala 2.2.',
+      am: 'የክፍል ሥራ፣ መልመጃ 2.1፣ መልመጃ 2.2።',
+      en: 'Classwork, Exercise 2.1 and Exercise 2.2.'
     }
   },
   {

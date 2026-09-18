@@ -13,12 +13,16 @@ import {
   ExternalLink,
   ChevronRight,
   Send,
-  FileText
+  FileText,
+  Download,
+  Printer
 } from 'lucide-react';
-import { Language, Course, Lesson } from '../types';
+import { Language, Course, Lesson, CurriculumWeek, SchoolInfo } from '../types';
 import { TEXTBOOK_LIBRARY, IntegratedCourseBook, TextbookUnit, TextbookExercise } from '../data/textbookLibrary';
 import { translations } from '../lib/i18n';
 import { cn } from '../lib/utils';
+import { exportCurriculumToWord, exportCurriculumToExcel, exportCurriculumToPdf, exportCurriculumToHtml, openPrintWindow } from '../lib/exportUtils';
+import { initialSchoolInfo, INITIAL_CURRICULUM_2016 } from '../data/curriculum2016';
 
 interface TextbookGuideModalProps {
   isOpen: boolean;
@@ -94,6 +98,25 @@ export default function TextbookGuideModal({
       setCopiedNotification(null);
       onClose();
     }, 1200);
+  };
+
+  const getSchoolInfoForExport = (): SchoolInfo => ({
+    ...initialSchoolInfo,
+    subject: { om: bookData.studentBook.title.om, am: bookData.studentBook.title.am, en: bookData.studentBook.title.en },
+    gradeAndSection: { om: `Kutaa ${selectedGrade}ffaa`, am: `${selectedGrade}ኛ ክፍል`, en: `Grade ${selectedGrade}` }
+  });
+
+  const handleExportWord = () => {
+    exportCurriculumToWord(INITIAL_CURRICULUM_2016, getSchoolInfoForExport(), language);
+  };
+  const handleExportExcel = () => {
+    exportCurriculumToExcel(INITIAL_CURRICULUM_2016, getSchoolInfoForExport(), language);
+  };
+  const handleExportPDF = () => {
+    exportCurriculumToPdf(INITIAL_CURRICULUM_2016, getSchoolInfoForExport(), language);
+  };
+  const handlePrint = () => {
+    exportCurriculumToHtml(INITIAL_CURRICULUM_2016, getSchoolInfoForExport(), language);
   };
 
   return (
@@ -449,14 +472,37 @@ export default function TextbookGuideModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between text-xs">
-          <span className="text-gray-500 text-[11px]">
-            {language === 'am' 
-              ? 'በኢትዮጵያ 2016 አዲስ ሥርዓተ-ትምህርት መሠረት የተዘጋጀ የተማሪ መጽሐፍና የመምህሩ መምሪያ'
-              : language === 'en'
-              ? 'Based on the 2016 Ethiopian National Curriculum Framework Textbooks & Teacher\'s Guides'
-              : 'Akkaadaamii Barnoota Biyyooleessaa 2016 A.L.I irratti hundaa\'ee qophaa\'e'}
-          </span>
+        <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-gray-500 text-[11px] mr-1">
+              {language === 'am' ? 'ዓመታዊ ፕላን አውጣ:' : language === 'en' ? 'Export Annual Plan:' : 'Karoora Baasii:'}
+            </span>
+            <button
+              onClick={handleExportWord}
+              className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-2xs flex items-center gap-1 transition-colors"
+            >
+              <Download size={13} /> Word (.docx)
+            </button>
+            <button
+              onClick={handleExportExcel}
+              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium shadow-2xs flex items-center gap-1 transition-colors"
+            >
+              <Download size={13} /> Excel (.xlsx)
+            </button>
+            <button
+              onClick={handleExportPDF}
+              className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium shadow-2xs flex items-center gap-1 transition-colors"
+            >
+              <Download size={13} /> PDF
+            </button>
+            <button
+              onClick={handlePrint}
+              className="px-2.5 py-1 bg-slate-700 hover:bg-slate-800 text-white rounded-lg font-medium shadow-2xs flex items-center gap-1 transition-colors"
+            >
+              <Printer size={13} /> {t.printPdf}
+            </button>
+          </div>
+
           <button
             onClick={onClose}
             className="px-4 py-1.5 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-lg font-semibold transition-colors"
