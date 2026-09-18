@@ -12,7 +12,8 @@ import {
   FileText,
   Copy,
   ExternalLink,
-  Check
+  Check,
+  Download
 } from 'lucide-react';
 import { CurriculumWeek, SchoolInfo, Language, DailyPlan } from '../types';
 import { translations } from '../lib/i18n';
@@ -22,6 +23,9 @@ import {
   exportCurriculumToWord,
   exportDailyPlanToWord,
   exportCurriculumToExcel,
+  exportDailyPlanToExcel,
+  exportCurriculumToPdf,
+  exportDailyPlanToPdf,
   openPrintWindow,
   copyTableToClipboard
 } from '../lib/exportUtils';
@@ -102,9 +106,18 @@ export default function PrintView({
     if (docType === 'annual') {
       exportCurriculumToExcel(curriculum, schoolInfo, language);
     } else {
-      exportDailyPlanToCSV(dailyPlan, schoolInfo, language);
+      exportDailyPlanToExcel(dailyPlan, schoolInfo, language);
     }
     showNotice(t.exportExcelOption);
+  };
+
+  const handleDownloadPdf = () => {
+    if (docType === 'annual') {
+      exportCurriculumToPdf(curriculum, schoolInfo, language);
+    } else {
+      exportDailyPlanToPdf(dailyPlan, schoolInfo, language);
+    }
+    showNotice(t.exportPdfDownloadOption);
   };
 
   const handleExportCsv = () => {
@@ -230,24 +243,34 @@ export default function PrintView({
             </button>
           </div>
 
-          {/* Export to Word (.doc) */}
+          {/* Export to Word (.docx) */}
           <button
             onClick={handleExportWord}
             className="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
             title={t.exportWordOption}
           >
             <FileText size={14} />
-            <span className="hidden md:inline">Word (.doc)</span>
+            <span className="hidden md:inline">Word (.docx)</span>
           </button>
 
-          {/* Export to Excel (.xls) */}
+          {/* Export to Excel (.xlsx) */}
           <button
             onClick={handleExportExcel}
             className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
             title={t.exportExcelOption}
           >
             <FileSpreadsheet size={14} />
-            <span className="hidden md:inline">Excel (.xls)</span>
+            <span className="hidden md:inline">Excel (.xlsx)</span>
+          </button>
+
+          {/* Direct Download PDF (.pdf) */}
+          <button
+            onClick={handleDownloadPdf}
+            className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
+            title={t.exportPdfDownloadOption}
+          >
+            <Download size={14} />
+            <span className="hidden md:inline">PDF (.pdf)</span>
           </button>
 
           {/* Copy Table to Clipboard */}

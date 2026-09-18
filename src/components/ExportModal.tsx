@@ -8,8 +8,11 @@ import {
   exportCurriculumToWord, 
   exportCurriculumToExcel, 
   exportCurriculumToHtml,
+  exportCurriculumToPdf,
   exportDailyPlanToCSV,
   exportDailyPlanToWord,
+  exportDailyPlanToExcel,
+  exportDailyPlanToPdf,
   exportDailyPlanToJSON
 } from '../lib/exportUtils';
 import { getDailyPlan } from '../lib/storage';
@@ -57,6 +60,16 @@ export default function ExportModal({
     onOpenPrintView(docType);
   };
 
+  const handleDownloadPdf = () => {
+    if (docType === 'annual') {
+      exportCurriculumToPdf(curriculum, schoolInfo, language);
+      notifySuccess(t.exportPdfDownloadOption);
+    } else {
+      exportDailyPlanToPdf(dailyPlan, schoolInfo, language);
+      notifySuccess(t.exportPdfDownloadOption);
+    }
+  };
+
   const handleExportWord = () => {
     if (docType === 'annual') {
       exportCurriculumToWord(curriculum, schoolInfo, language);
@@ -72,7 +85,7 @@ export default function ExportModal({
       exportCurriculumToExcel(curriculum, schoolInfo, language);
       notifySuccess(t.exportExcelOption);
     } else {
-      exportDailyPlanToCSV(dailyPlan, schoolInfo, language);
+      exportDailyPlanToExcel(dailyPlan, schoolInfo, language);
       notifySuccess(t.exportExcelOption);
     }
   };
@@ -160,8 +173,31 @@ export default function ExportModal({
 
         {/* Modal Options Grid */}
         <div className="p-6 overflow-y-auto space-y-3">
+
+          {/* Direct Authentic PDF Download (.pdf) Option */}
+          <button
+            onClick={handleDownloadPdf}
+            className="w-full text-left p-3.5 rounded-xl border-2 border-rose-200 hover:border-rose-500 bg-rose-50/30 hover:bg-rose-50/70 transition-all flex items-start gap-3.5 group cursor-pointer shadow-2xs"
+          >
+            <div className="p-2 rounded-xl bg-rose-100 text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition-colors shrink-0">
+              <Download size={20} />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-sm text-gray-900 group-hover:text-rose-950">
+                  {t.exportPdfDownloadOption}
+                </span>
+                <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded border border-rose-200">
+                  PDF (.PDF)
+                </span>
+              </div>
+              <p className="text-xs text-gray-600 mt-0.5">
+                {t.exportPdfDownloadDesc}
+              </p>
+            </div>
+          </button>
           
-          {/* Microsoft Word (.doc) Option */}
+          {/* Microsoft Word (.docx) Option */}
           <button
             onClick={handleExportWord}
             className="w-full text-left p-3.5 rounded-xl border border-gray-200 hover:border-blue-500 hover:bg-blue-50/40 transition-all flex items-start gap-3.5 group cursor-pointer"
@@ -175,7 +211,7 @@ export default function ExportModal({
                   {t.exportWordOption}
                 </span>
                 <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
-                  DOC / WORD
+                  WORD (.DOCX)
                 </span>
               </div>
               <p className="text-xs text-gray-500 mt-0.5">
@@ -184,7 +220,7 @@ export default function ExportModal({
             </div>
           </button>
 
-          {/* Excel Spreadsheet (.xls) Option */}
+          {/* Excel Spreadsheet (.xlsx) Option */}
           <button
             onClick={handleExportExcel}
             className="w-full text-left p-3.5 rounded-xl border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50/40 transition-all flex items-start gap-3.5 group cursor-pointer"
@@ -198,7 +234,7 @@ export default function ExportModal({
                   {t.exportExcelOption}
                 </span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
-                  EXCEL (.XLS)
+                  EXCEL (.XLSX)
                 </span>
               </div>
               <p className="text-xs text-gray-500 mt-0.5">

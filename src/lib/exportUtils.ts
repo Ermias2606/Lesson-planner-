@@ -1,13 +1,35 @@
 import { CurriculumWeek, SchoolInfo, Language, DailyPlan } from '../types';
 import { translations } from './i18n';
+import * as XLSX from 'xlsx';
+import {
+  Document,
+  Packer,
+  Paragraph,
+  Table,
+  TableRow,
+  TableCell,
+  TextRun,
+  WidthType,
+  PageOrientation,
+  AlignmentType
+} from 'docx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 /**
  * Universal safe file downloader for browser and iframe environments.
+ * Supports Blobs (binary .docx, .xlsx, .pdf), Uint8Arrays, and text strings.
  * Prevents premature URL.revokeObjectURL bugs that cancel downloads in Chrome/Safari.
  */
-export function downloadBlob(content: string, fileName: string, contentType: string) {
+export function downloadBlob(
+  content: string | Blob | Uint8Array | ArrayBuffer, 
+  fileName: string, 
+  contentType: string
+) {
   try {
-    const blob = new Blob([content], { type: contentType });
+    const blob = content instanceof Blob 
+      ? content 
+      : new Blob([content as any], { type: contentType });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.style.display = 'none';
@@ -22,21 +44,23 @@ export function downloadBlob(content: string, fileName: string, contentType: str
         document.body.removeChild(link);
       }
       URL.revokeObjectURL(url);
-    }, 4000);
+    }, 5000);
   } catch (err) {
     console.error('Blob download failed, attempting data URI fallback:', err);
     try {
-      const encodedUri = encodeURI(`data:${contentType},` + content);
-      const link = document.createElement('a');
-      link.href = encodedUri;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      setTimeout(() => {
-        if (document.body.contains(link)) {
-          document.body.removeChild(link);
-        }
-      }, 2000);
+      if (typeof content === 'string') {
+        const encodedUri = encodeURI(`data:${contentType},` + content);
+        const link = document.createElement('a');
+        link.href = encodedUri;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+          if (document.body.contains(link)) {
+            document.body.removeChild(link);
+          }
+        }, 2000);
+      }
     } catch (fallbackErr) {
       console.error('Data URI download failed:', fallbackErr);
     }
@@ -58,6 +82,7 @@ export function exportCurriculumToCSV(
     [schoolInfo.schoolName[lang]],
     [`${t.academicYear}: ${schoolInfo.academicYear[lang]}`, `${t.subject}: ${schoolInfo.subject[lang]}`, `${t.gradeAndSection}: ${schoolInfo.gradeAndSection[lang]}`],
     [`${t.teacherName}: ${schoolInfo.teacherName[lang]}`, `${t.annualDays}: ${schoolInfo.annualDays}`, `${t.annualPeriods}: ${schoolInfo.annualPeriods}`, `${t.weeklyPeriods}: ${schoolInfo.weeklyPeriods}`],
+    [`${t.deptHead}: ${schoolInfo.departmentHeadName[lang]}`, `${t.principal}: ${schoolInfo.principalName[lang]}`],
     [],
     [
       t.month,
@@ -170,302 +195,209 @@ export function exportDailyPlanToCSV(
 }
 
 // -------------------------------------------------------------
-// MICROSOFT WORD (.doc / HTML XML) EXPORT
+// GENUINE MICROSOFT WORD (.docx) EXPORT
+// Native OpenXML binary format - opens cleanly in Word & Google Docs
+// with ZERO "feature is not allowed" or Trust Center blocks.
 // -------------------------------------------------------------
 
-export function exportCurriculumToWord(
+export async function exportCurriculumToWord(
   curriculum: CurriculumWeek[], 
   schoolInfo: SchoolInfo, 
   lang: Language
 ) {
   const t = translations[lang];
 
-  const bureauTitle = lang === 'am' 
-    ? 'የኦሮሚያ ክልላዊ መንግሥት · የትምህርት ቢሮ (OEB)'
-    : lang === 'en'
-    ? 'OROMIA REGIONAL STATE · EDUCATION BUREAU (OEB)'
-    : 'MOOTUMMAA NAANNOO OROMIYAA · BIIROO BARNOOTAA OROMIYAA';
+  const headers = [
+    t.month,
+    t.week,
+    t.date,
+    t.pages,
+    t.chapter,
+    t.mainTopic,
+    t.objectives,
+    t.priorKnowledge,
+    t.lessonOutcome,
+    t.teachingMethod,
+    t.materials,
+    t.assessment
+  ];
 
-  let tableRows = '';
-  curriculum.forEach((item) => {
-    const bgStyle = item.isExamWeek ? 'background-color: #fef3c7; font-weight: bold;' : '';
-    tableRows += `
-      <tr style="${bgStyle}">
-        <td style="border: 1pt solid #000; padding: 4pt; text-align: center; font-weight: bold;">${escapeHtml(item.monthName[lang])}</td>
-        <td style="border: 1pt solid #000; padding: 4pt; text-align: center;">${item.weekNumber}</td>
-        <td style="border: 1pt solid #000; padding: 4pt; text-align: center; white-space: nowrap;">${escapeHtml(item.dateRange)}</td>
-        <td style="border: 1pt solid #000; padding: 4pt; text-align: center;">${escapeHtml(item.pages)}</td>
-        <td style="border: 1pt solid #000; padding: 4pt;">${escapeHtml(item.chapter[lang])}</td>
-        <td style="border: 1pt solid #000; padding: 4pt; font-weight: bold;">${escapeHtml(item.mainTopic[lang])}</td>
-        <td style="border: 1pt solid #000; padding: 4pt;">${escapeHtml(item.generalObjectives[lang])}</td>
-        <td style="border: 1pt solid #000; padding: 4pt;">${escapeHtml(item.priorKnowledge[lang])}</td>
-        <td style="border: 1pt solid #000; padding: 4pt;">${escapeHtml(item.lessonOutcome[lang])}</td>
-        <td style="border: 1pt solid #000; padding: 4pt;">${escapeHtml(item.teachingMethod[lang])}</td>
-        <td style="border: 1pt solid #000; padding: 4pt;">${escapeHtml(item.teachingAids[lang])}</td>
-        <td style="border: 1pt solid #000; padding: 4pt;">${escapeHtml(item.assessment[lang])}</td>
-      </tr>
-    `;
+  const headerRow = new TableRow({
+    tableHeader: true,
+    children: headers.map(h => new TableCell({
+      children: [new Paragraph({
+        children: [new TextRun({ text: h, bold: true, size: 16 })],
+        alignment: AlignmentType.CENTER
+      })],
+      shading: { fill: 'E2E8F0' }
+    }))
   });
 
-  const wordHtml = `
-    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-    <head>
-      <meta charset='utf-8'>
-      <title>${escapeHtml(schoolInfo.schoolName[lang])} - ${escapeHtml(t.annualPlanTitle)}</title>
-      <!--[if gte mso 9]>
-      <xml>
-        <w:WordDocument>
-          <w:View>Print</w:View>
-          <w:Zoom>100</w:Zoom>
-          <w:DoNotOptimizeForBrowser/>
-        </w:WordDocument>
-      </xml>
-      <![endif]-->
-      <style>
-        @page Section1 {
-          size: 841.9pt 595.3pt; /* A4 Landscape in points */
-          mso-page-orientation: landscape;
-          margin: 28.35pt 28.35pt 28.35pt 28.35pt;
+  const bodyRows = curriculum.map(item => new TableRow({
+    children: [
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.monthName[lang] || '', bold: true, size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `W${item.weekNumber}`, size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.dateRange || '', size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.pages || '', bold: true, size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.chapter[lang] || '', size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.mainTopic[lang] || '', bold: true, size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.generalObjectives[lang] || '', size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.priorKnowledge[lang] || '', size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.lessonOutcome[lang] || '', size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.teachingMethod[lang] || '', size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.teachingAids[lang] || '', size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.assessment[lang] || '', size: 15 })] })] }),
+    ]
+  }));
+
+  const doc = new Document({
+    sections: [{
+      properties: {
+        page: {
+          size: {
+            orientation: PageOrientation.LANDSCAPE
+          },
+          margin: {
+            top: 720,
+            right: 720,
+            bottom: 720,
+            left: 720
+          }
         }
-        div.Section1 { page: Section1; }
-        body { font-family: 'Calibri', 'Arial', 'Nyala', sans-serif; font-size: 9pt; color: #000000; }
-        table { border-collapse: collapse; width: 100%; }
-        th { border: 1pt solid #000; background-color: #f1f5f9; padding: 5pt; font-weight: bold; font-size: 8.5pt; text-align: center; }
-        td { font-size: 8.5pt; }
-        .inst-header { width: 100%; margin-bottom: 10pt; border-bottom: 2pt solid #000; padding-bottom: 6pt; }
-        .meta-box { background-color: #f8fafc; border: 1pt solid #cbd5e1; padding: 6pt; margin-top: 6pt; }
-        .signatures { margin-top: 18pt; width: 100%; }
-      </style>
-    </head>
-    <body>
-      <div class="Section1">
-        <div class="inst-header">
-          <table style="border: none; width: 100%;">
-            <tr>
-              <td style="border: none; vertical-align: top;">
-                <div style="font-size: 9pt; font-weight: bold; color: #475569; text-transform: uppercase;">${escapeHtml(bureauTitle)}</div>
-                <h1 style="font-size: 16pt; margin: 2pt 0; text-transform: uppercase; font-weight: 900;">${escapeHtml(schoolInfo.schoolName[lang])}</h1>
-                <div style="font-size: 8.5pt; color: #64748b; font-style: italic;">${escapeHtml(t.curriculumFrameworkNotice)}</div>
-              </td>
-              <td style="border: none; vertical-align: top; text-align: right;">
-                <div style="font-size: 13pt; font-weight: 900; text-transform: uppercase;">${escapeHtml(t.annualPlanTitle)}</div>
-                <div style="font-size: 10pt; font-weight: bold; margin-top: 2pt;">${escapeHtml(schoolInfo.academicYear[lang])} · ${escapeHtml(schoolInfo.subject[lang])} (${escapeHtml(schoolInfo.gradeAndSection[lang])})</div>
-              </td>
-            </tr>
-          </table>
+      },
+      children: [
+        new Paragraph({
+          children: [new TextRun({ text: schoolInfo.schoolName[lang] || 'School Name', bold: true, size: 28 })],
+          alignment: AlignmentType.CENTER
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: `${t.annualPlanTitle} · ${schoolInfo.academicYear[lang]} · ${schoolInfo.subject[lang]} (${schoolInfo.gradeAndSection[lang]})`, bold: true, size: 20 })],
+          alignment: AlignmentType.CENTER
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: `${t.teacherName}: ${schoolInfo.teacherName[lang]} | ${t.weeklyPeriods}: ${schoolInfo.weeklyPeriods} | ${t.deptHead}: ${schoolInfo.departmentHeadName[lang]} | ${t.principal}: ${schoolInfo.principalName[lang]}`, size: 16 })],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200 }
+        }),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [headerRow, ...bodyRows]
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: `\n${t.teacherName}: ____________________  |  ${t.deptHead}: ____________________  |  ${t.principal}: ____________________`, bold: true, size: 16 })],
+          spacing: { before: 300 }
+        })
+      ]
+    }]
+  });
 
-          <div class="meta-box">
-            <table style="border: none; width: 100%; font-size: 8.5pt;">
-              <tr>
-                <td style="border: none;"><strong>${escapeHtml(t.teacherName)}:</strong> ${escapeHtml(schoolInfo.teacherName[lang])}</td>
-                <td style="border: none;"><strong>${escapeHtml(t.gradeAndSection)}:</strong> ${escapeHtml(schoolInfo.gradeAndSection[lang])}</td>
-                <td style="border: none;"><strong>${escapeHtml(t.subject)}:</strong> ${escapeHtml(schoolInfo.subject[lang])}</td>
-                <td style="border: none;"><strong>${escapeHtml(t.weeklyPeriods)}:</strong> ${escapeHtml(schoolInfo.weeklyPeriods)} (${escapeHtml(schoolInfo.periodDuration[lang])})</td>
-              </tr>
-              <tr>
-                <td style="border: none;"><strong>${escapeHtml(t.annualPeriods)}:</strong> ${escapeHtml(schoolInfo.annualPeriods)} (${escapeHtml(schoolInfo.annualDays)})</td>
-                <td style="border: none;"><strong>${escapeHtml(t.deptHead)}:</strong> ${escapeHtml(schoolInfo.departmentHeadName[lang])}</td>
-                <td style="border: none;"><strong>${escapeHtml(t.principal)}:</strong> ${escapeHtml(schoolInfo.principalName[lang])}</td>
-                <td style="border: none;"></td>
-              </tr>
-            </table>
-          </div>
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 45pt;">${escapeHtml(t.month)}</th>
-              <th style="width: 25pt;">${escapeHtml(t.week)}</th>
-              <th style="width: 50pt;">${escapeHtml(t.date)}</th>
-              <th style="width: 30pt;">${escapeHtml(t.pages)}</th>
-              <th style="width: 60pt;">${escapeHtml(t.chapter)}</th>
-              <th style="width: 110pt;">${escapeHtml(t.mainTopic)}</th>
-              <th style="width: 120pt;">${escapeHtml(t.objectives)}</th>
-              <th style="width: 90pt;">${escapeHtml(t.priorKnowledge)}</th>
-              <th style="width: 90pt;">${escapeHtml(t.lessonOutcome)}</th>
-              <th style="width: 80pt;">${escapeHtml(t.teachingMethod)}</th>
-              <th style="width: 70pt;">${escapeHtml(t.materials)}</th>
-              <th style="width: 80pt;">${escapeHtml(t.assessment)}</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRows}
-          </tbody>
-        </table>
-
-        <div class="signatures">
-          <table style="border: none; width: 100%; border-top: 2pt solid #000; padding-top: 8pt;">
-            <tr>
-              <td style="border: 1pt solid #cbd5e1; padding: 6pt; width: 32%; background-color: #f8fafc;">
-                <strong>${escapeHtml(t.teacherName).toUpperCase()}</strong><br/>
-                ${escapeHtml(schoolInfo.teacherName[lang])}<br/><br/>
-                ${escapeHtml(t.signature)}: ________________________<br/>
-                ${escapeHtml(t.date)}: ____ / ____ / ${escapeHtml(schoolInfo.academicYear[lang])}
-              </td>
-              <td style="border: 1pt solid #cbd5e1; padding: 6pt; width: 32%; background-color: #f8fafc;">
-                <strong>${escapeHtml(t.deptHead).toUpperCase()}</strong><br/>
-                ${escapeHtml(schoolInfo.departmentHeadName[lang])}<br/><br/>
-                ${escapeHtml(t.signature)}: ________________________<br/>
-                ${escapeHtml(t.date)}: ____ / ____ / ${escapeHtml(schoolInfo.academicYear[lang])}
-              </td>
-              <td style="border: 1pt solid #cbd5e1; padding: 6pt; width: 32%; background-color: #f8fafc;">
-                <strong>${escapeHtml(t.principal).toUpperCase()}</strong><br/>
-                ${escapeHtml(schoolInfo.principalName[lang])}<br/><br/>
-                ${escapeHtml(t.signature)}: ________________________<br/>
-                ${escapeHtml(t.date)}: ____ / ____ / ${escapeHtml(schoolInfo.academicYear[lang])}
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
+  const blob = await Packer.toBlob(doc);
   const yearTag = (schoolInfo.academicYear[lang] || '2019').replace(/[^a-zA-Z0-9]/g, '_').slice(0, 15);
-  const fileName = `Karoora_Barnootaa_${yearTag}_${schoolInfo.subject[lang].replace(/\s+/g, '_')}_${lang.toUpperCase()}.doc`;
-  downloadBlob(wordHtml, fileName, 'application/msword;charset=utf-8;');
+  const fileName = `Karoora_Barnootaa_${yearTag}_${schoolInfo.subject[lang].replace(/\s+/g, '_')}_${lang.toUpperCase()}.docx`;
+  downloadBlob(blob, fileName, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 }
 
-export function exportDailyPlanToWord(
+export async function exportDailyPlanToWord(
   dailyPlan: DailyPlan,
   schoolInfo: SchoolInfo,
   lang: Language
 ) {
   const t = translations[lang];
 
-  let lessonRows = '';
-  dailyPlan.lessons.forEach((lesson, idx) => {
-    lessonRows += `
-      <tr>
-        <td style="border: 1pt solid #000; padding: 6pt; text-align: center; vertical-align: top; width: 60pt;">
-          <strong>Period ${idx + 1}</strong><br/>
-          <span style="font-size: 8pt; color: #475569;">${lesson.timeStart} - ${lesson.timeEnd}</span><br/>
-          <span style="font-size: 7.5pt; color: #64748b;">(${escapeHtml(t.duration45Min)})</span>
-        </td>
-        <td style="border: 1pt solid #000; padding: 6pt; vertical-align: top; width: 100pt;">
-          <div style="font-size: 8pt; color: #3730a3; font-weight: bold;">${escapeHtml(lesson.chapter || schoolInfo.subject[lang])}</div>
-          <div style="font-size: 9pt; font-weight: bold; margin-top: 2pt;">${escapeHtml(lesson.mainTopic)}</div>
-          <div style="font-size: 8pt; color: #1e293b; margin-top: 4pt;"><strong>${escapeHtml(t.pages)}:</strong> ${escapeHtml(lesson.studentBookPages || '')}</div>
-          ${lesson.textbookExercises ? `<div style="font-size: 7.5pt; color: #475569;"><strong>${escapeHtml(t.textbookExercises)}:</strong> ${escapeHtml(lesson.textbookExercises)}</div>` : ''}
-          ${lesson.teacherGuidePages ? `<div style="font-size: 7.5pt; color: #065f46;"><strong>${escapeHtml(t.teacherGuide)}:</strong> ${escapeHtml(lesson.teacherGuidePages)}</div>` : ''}
-        </td>
-        <td style="border: 1pt solid #000; padding: 6pt; vertical-align: top; width: 110pt;">
-          <div>${escapeHtml(lesson.objectives)}</div>
-          ${lesson.priorKnowledge ? `<div style="font-size: 8pt; color: #475569; margin-top: 4pt; border-top: 0.5pt solid #cbd5e1; padding-top: 2pt;"><strong>${escapeHtml(t.priorKnowledge)}:</strong> ${escapeHtml(lesson.priorKnowledge)}</div>` : ''}
-        </td>
-        <td style="border: 1pt solid #000; padding: 6pt; vertical-align: top;">
-          <div style="white-space: pre-line; line-height: 1.4;">${escapeHtml(lesson.activities || lesson.teacherGuideSteps || lesson.methodology || '')}</div>
-        </td>
-        <td style="border: 1pt solid #000; padding: 6pt; vertical-align: top; width: 90pt;">
-          <div><strong>${escapeHtml(t.materials)}:</strong><br/>${escapeHtml(lesson.materials || '')}</div>
-          <div style="margin-top: 6pt; border-top: 0.5pt solid #cbd5e1; padding-top: 3pt;"><strong>${escapeHtml(t.assessment)}:</strong><br/>${escapeHtml(lesson.assessment || '')}</div>
-        </td>
-      </tr>
-    `;
+  const headers = [
+    t.period,
+    t.time,
+    t.chapter,
+    t.mainTopic,
+    t.pages,
+    t.objectives,
+    t.priorKnowledge,
+    t.activities,
+    t.materials,
+    t.assessment
+  ];
+
+  const headerRow = new TableRow({
+    tableHeader: true,
+    children: headers.map(h => new TableCell({
+      children: [new Paragraph({
+        children: [new TextRun({ text: h, bold: true, size: 16 })],
+        alignment: AlignmentType.CENTER
+      })],
+      shading: { fill: 'E2E8F0' }
+    }))
   });
 
-  const wordHtml = `
-    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-    <head>
-      <meta charset='utf-8'>
-      <title>${escapeHtml(t.dailyView)} - ${dailyPlan.date}</title>
-      <!--[if gte mso 9]>
-      <xml>
-        <w:WordDocument>
-          <w:View>Print</w:View>
-          <w:Zoom>100</w:Zoom>
-          <w:DoNotOptimizeForBrowser/>
-        </w:WordDocument>
-      </xml>
-      <![endif]-->
-      <style>
-        @page Section1 {
-          size: 595.3pt 841.9pt; /* A4 Portrait */
-          margin: 28.35pt 28.35pt 28.35pt 28.35pt;
+  const bodyRows = dailyPlan.lessons.map((lesson, idx) => new TableRow({
+    children: [
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `Period ${idx + 1}`, bold: true, size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${lesson.timeStart} - ${lesson.timeEnd}`, size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: lesson.chapter || schoolInfo.subject[lang], size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: lesson.mainTopic || '', bold: true, size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: lesson.studentBookPages || '', size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: lesson.objectives || '', size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: lesson.priorKnowledge || '', size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: lesson.activities || lesson.teacherGuideSteps || lesson.methodology || '', size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: lesson.materials || '', size: 15 })] })] }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: lesson.assessment || '', size: 15 })] })] })
+    ]
+  }));
+
+  const doc = new Document({
+    sections: [{
+      properties: {
+        page: {
+          size: {
+            orientation: PageOrientation.LANDSCAPE
+          },
+          margin: {
+            top: 720,
+            right: 720,
+            bottom: 720,
+            left: 720
+          }
         }
-        div.Section1 { page: Section1; }
-        body { font-family: 'Calibri', 'Arial', 'Nyala', sans-serif; font-size: 9pt; color: #000000; }
-        table { border-collapse: collapse; width: 100%; }
-        th { border: 1pt solid #000; background-color: #f1f5f9; padding: 5pt; font-weight: bold; font-size: 8.5pt; text-align: center; }
-        td { font-size: 8.5pt; }
-      </style>
-    </head>
-    <body>
-      <div class="Section1">
-        <div style="border-bottom: 2pt solid #000; padding-bottom: 6pt; margin-bottom: 10pt;">
-          <table style="border: none; width: 100%;">
-            <tr>
-              <td style="border: none;">
-                <h1 style="font-size: 14pt; margin: 0; text-transform: uppercase;">${escapeHtml(schoolInfo.schoolName[lang])}</h1>
-                <div style="font-size: 9pt; color: #475569;">${escapeHtml(t.curriculumFrameworkNotice)}</div>
-              </td>
-              <td style="border: none; text-align: right;">
-                <div style="font-size: 12pt; font-weight: 900; text-transform: uppercase;">${escapeHtml(t.printDocumentDaily)}</div>
-                <div style="font-size: 9pt; font-weight: bold;">${dailyPlan.date} (${escapeHtml(schoolInfo.academicYear[lang])})</div>
-              </td>
-            </tr>
-          </table>
+      },
+      children: [
+        new Paragraph({
+          children: [new TextRun({ text: schoolInfo.schoolName[lang] || 'School Name', bold: true, size: 28 })],
+          alignment: AlignmentType.CENTER
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: `${t.dailyTitle} · ${dailyPlan.date} · ${schoolInfo.subject[lang]} (${schoolInfo.gradeAndSection[lang]})`, bold: true, size: 20 })],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200 }
+        }),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [headerRow, ...bodyRows]
+        }),
+        ...(dailyPlan.notes ? [
+          new Paragraph({
+            children: [
+              new TextRun({ text: `\n${t.notesTitle}: `, bold: true, size: 16 }),
+              new TextRun({ text: dailyPlan.notes, size: 16 })
+            ],
+            spacing: { before: 200 }
+          })
+        ] : []),
+        new Paragraph({
+          children: [new TextRun({ text: `\n${t.teacherName}: ____________________  |  ${t.deptHead}: ____________________`, bold: true, size: 16 })],
+          spacing: { before: 300 }
+        })
+      ]
+    }]
+  });
 
-          <div style="background-color: #f8fafc; border: 1pt solid #cbd5e1; padding: 6pt; margin-top: 6pt;">
-            <table style="border: none; width: 100%; font-size: 8.5pt;">
-              <tr>
-                <td style="border: none;"><strong>${escapeHtml(t.teacherName)}:</strong> ${escapeHtml(schoolInfo.teacherName[lang])}</td>
-                <td style="border: none;"><strong>${escapeHtml(t.gradeAndSection)}:</strong> ${escapeHtml(schoolInfo.gradeAndSection[lang])}</td>
-                <td style="border: none;"><strong>${escapeHtml(t.subject)}:</strong> ${escapeHtml(schoolInfo.subject[lang])}</td>
-                <td style="border: none;"><strong>${escapeHtml(t.deptHead)}:</strong> ${escapeHtml(schoolInfo.departmentHeadName[lang])}</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>${escapeHtml(t.period)}</th>
-              <th>${escapeHtml(t.chapter)} & ${escapeHtml(t.mainTopic)}</th>
-              <th>${escapeHtml(t.objectives)}</th>
-              <th>${escapeHtml(t.fivePhaseLesson)}</th>
-              <th>${escapeHtml(t.materials)} & ${escapeHtml(t.assessment)}</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${lessonRows}
-            ${dailyPlan.notes ? `
-              <tr>
-                <td style="border: 1pt solid #000; padding: 6pt; font-weight: bold; background-color: #f8fafc;">${escapeHtml(t.notesTitle)}</td>
-                <td colspan="4" style="border: 1pt solid #000; padding: 6pt;">${escapeHtml(dailyPlan.notes)}</td>
-              </tr>
-            ` : ''}
-          </tbody>
-        </table>
-
-        <div style="margin-top: 20pt; border-top: 1.5pt solid #000; padding-top: 8pt;">
-          <table style="border: none; width: 100%;">
-            <tr>
-              <td style="border: none; width: 50%;">
-                <strong>${escapeHtml(t.teacherName)}:</strong> ${escapeHtml(schoolInfo.teacherName[lang])}<br/><br/>
-                ${escapeHtml(t.signature)}: ___________________________ (Date: ${dailyPlan.date})
-              </td>
-              <td style="border: none; width: 50%;">
-                <strong>${escapeHtml(t.deptHead)}:</strong> ${escapeHtml(schoolInfo.departmentHeadName[lang])}<br/><br/>
-                Approval Signature: ___________________________ (Date: ____/____/${escapeHtml(schoolInfo.academicYear[lang])})
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
-  const fileName = `Karoora_Guyyaa_${dailyPlan.date}_${lang.toUpperCase()}.doc`;
-  downloadBlob(wordHtml, fileName, 'application/msword;charset=utf-8;');
+  const blob = await Packer.toBlob(doc);
+  const fileName = `Karoora_Guyyaa_${dailyPlan.date}_${lang.toUpperCase()}.docx`;
+  downloadBlob(blob, fileName, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 }
 
 // -------------------------------------------------------------
-// EXCEL (.xls XML HTML) EXPORT
+// GENUINE MICROSOFT EXCEL (.xlsx) EXPORT (SheetJS)
+// Native OpenXML binary spreadsheet - opens cleanly in Excel,
+// Google Sheets, and LibreOffice with ZERO format mismatch warnings.
 // -------------------------------------------------------------
 
 export function exportCurriculumToExcel(
@@ -475,81 +407,337 @@ export function exportCurriculumToExcel(
 ) {
   const t = translations[lang];
 
-  let rowsHtml = '';
+  const data: (string | number)[][] = [
+    [schoolInfo.schoolName[lang]],
+    [`${t.annualPlanTitle} · ${schoolInfo.academicYear[lang]}`],
+    [`${t.subject}: ${schoolInfo.subject[lang]}`, `${t.gradeAndSection}: ${schoolInfo.gradeAndSection[lang]}`],
+    [
+      `${t.teacherName}: ${schoolInfo.teacherName[lang]}`,
+      `${t.weeklyPeriods}: ${schoolInfo.weeklyPeriods} (${schoolInfo.periodDuration[lang]})`,
+      `${t.annualPeriods}: ${schoolInfo.annualPeriods} (${schoolInfo.annualDays})`,
+      `${t.deptHead}: ${schoolInfo.departmentHeadName[lang]}`,
+      `${t.principal}: ${schoolInfo.principalName[lang]}`
+    ],
+    [],
+    [
+      t.month,
+      t.week,
+      t.date,
+      t.pages,
+      t.chapter,
+      t.mainTopic,
+      t.objectives,
+      t.priorKnowledge,
+      t.lessonOutcome,
+      t.teachingMethod,
+      t.materials,
+      t.assessment
+    ]
+  ];
+
   curriculum.forEach(item => {
-    rowsHtml += `
-      <tr>
-        <td style="border: 0.5pt solid #000; text-align: center; font-weight: bold;">${escapeHtml(item.monthName[lang])}</td>
-        <td style="border: 0.5pt solid #000; text-align: center;">W${item.weekNumber}</td>
-        <td style="border: 0.5pt solid #000; text-align: center;">${escapeHtml(item.dateRange)}</td>
-        <td style="border: 0.5pt solid #000; text-align: center;">${escapeHtml(item.pages)}</td>
-        <td style="border: 0.5pt solid #000;">${escapeHtml(item.chapter[lang])}</td>
-        <td style="border: 0.5pt solid #000; font-weight: bold;">${escapeHtml(item.mainTopic[lang])}</td>
-        <td style="border: 0.5pt solid #000;">${escapeHtml(item.generalObjectives[lang])}</td>
-        <td style="border: 0.5pt solid #000;">${escapeHtml(item.priorKnowledge[lang])}</td>
-        <td style="border: 0.5pt solid #000;">${escapeHtml(item.lessonOutcome[lang])}</td>
-        <td style="border: 0.5pt solid #000;">${escapeHtml(item.teachingMethod[lang])}</td>
-        <td style="border: 0.5pt solid #000;">${escapeHtml(item.teachingAids[lang])}</td>
-        <td style="border: 0.5pt solid #000;">${escapeHtml(item.assessment[lang])}</td>
-      </tr>
-    `;
+    data.push([
+      item.monthName[lang] || '',
+      `W${item.weekNumber}`,
+      item.dateRange || '',
+      item.pages || '',
+      item.chapter[lang] || '',
+      item.mainTopic[lang] || '',
+      item.generalObjectives[lang] || '',
+      item.priorKnowledge[lang] || '',
+      item.lessonOutcome[lang] || '',
+      item.teachingMethod[lang] || '',
+      item.teachingAids[lang] || '',
+      item.assessment[lang] || ''
+    ]);
   });
 
-  const excelHtml = `
-    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-    <head>
-      <meta charset="utf-8">
-      <!--[if gte mso 9]>
-      <xml>
-        <x:ExcelWorkbook>
-          <x:ExcelWorksheets>
-            <x:ExcelWorksheet>
-              <x:Name>AnnualPlan</x:Name>
-              <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
-            </x:ExcelWorksheet>
-          </x:ExcelWorksheets>
-        </x:ExcelWorkbook>
-      </xml>
-      <![endif]-->
-      <style>
-        table { border-collapse: collapse; }
-        th { background-color: #e2e8f0; font-weight: bold; border: 0.5pt solid #000000; padding: 4pt; }
-        td { border: 0.5pt solid #000000; padding: 3pt; font-family: Arial, sans-serif; font-size: 9pt; }
-      </style>
-    </head>
-    <body>
-      <table>
-        <tr>
-          <th colspan="12" style="font-size: 14pt; background-color: #ffffff; text-align: left;">${escapeHtml(schoolInfo.schoolName[lang])} - ${escapeHtml(t.annualPlanTitle)} (${escapeHtml(schoolInfo.academicYear[lang])})</th>
-        </tr>
-        <tr>
-          <td colspan="4"><strong>${escapeHtml(t.teacherName)}:</strong> ${escapeHtml(schoolInfo.teacherName[lang])}</td>
-          <td colspan="4"><strong>${escapeHtml(t.gradeAndSection)}:</strong> ${escapeHtml(schoolInfo.gradeAndSection[lang])}</td>
-          <td colspan="4"><strong>${escapeHtml(t.subject)}:</strong> ${escapeHtml(schoolInfo.subject[lang])}</td>
-        </tr>
-        <tr>
-          <th style="width: 60pt;">${escapeHtml(t.month)}</th>
-          <th style="width: 35pt;">${escapeHtml(t.week)}</th>
-          <th style="width: 60pt;">${escapeHtml(t.date)}</th>
-          <th style="width: 40pt;">${escapeHtml(t.pages)}</th>
-          <th style="width: 80pt;">${escapeHtml(t.chapter)}</th>
-          <th style="width: 140pt;">${escapeHtml(t.mainTopic)}</th>
-          <th style="width: 150pt;">${escapeHtml(t.objectives)}</th>
-          <th style="width: 110pt;">${escapeHtml(t.priorKnowledge)}</th>
-          <th style="width: 110pt;">${escapeHtml(t.lessonOutcome)}</th>
-          <th style="width: 100pt;">${escapeHtml(t.teachingMethod)}</th>
-          <th style="width: 90pt;">${escapeHtml(t.materials)}</th>
-          <th style="width: 100pt;">${escapeHtml(t.assessment)}</th>
-        </tr>
-        ${rowsHtml}
-      </table>
-    </body>
-    </html>
-  `;
+  data.push([]);
+  data.push([
+    `${t.teacherName}: ${schoolInfo.teacherName[lang]} (Date: ____/____/${schoolInfo.academicYear[lang]})`,
+    '',
+    `${t.deptHead}: ${schoolInfo.departmentHeadName[lang]} (Approved: ______)`,
+    '',
+    `${t.principal}: ${schoolInfo.principalName[lang]} (Verified: ______)`
+  ]);
+
+  const worksheet = XLSX.utils.aoa_to_sheet(data);
+  worksheet['!cols'] = [
+    { wch: 14 },
+    { wch: 8 },
+    { wch: 16 },
+    { wch: 10 },
+    { wch: 22 },
+    { wch: 32 },
+    { wch: 35 },
+    { wch: 25 },
+    { wch: 25 },
+    { wch: 25 },
+    { wch: 22 },
+    { wch: 25 }
+  ];
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Annual Curriculum');
+
+  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  const yearTag = (schoolInfo.academicYear[lang] || '2019').replace(/[^a-zA-Z0-9]/g, '_').slice(0, 15);
+  const fileName = `Karoora_Barnootaa_${yearTag}_${schoolInfo.subject[lang].replace(/\s+/g, '_')}_${lang.toUpperCase()}.xlsx`;
+
+  downloadBlob(
+    new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+    fileName,
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  );
+}
+
+export function exportDailyPlanToExcel(
+  dailyPlan: DailyPlan,
+  schoolInfo: SchoolInfo,
+  lang: Language
+) {
+  const t = translations[lang];
+
+  const data: (string | number)[][] = [
+    [schoolInfo.schoolName[lang]],
+    [`${t.dailyTitle} · ${dailyPlan.date}`],
+    [`${t.subject}: ${schoolInfo.subject[lang]}`, `${t.gradeAndSection}: ${schoolInfo.gradeAndSection[lang]}`],
+    [`${t.teacherName}: ${schoolInfo.teacherName[lang]}`, `${t.deptHead}: ${schoolInfo.departmentHeadName[lang]}`],
+    [],
+    [
+      t.period,
+      t.time,
+      t.chapter,
+      t.mainTopic,
+      t.pages,
+      t.objectives,
+      t.priorKnowledge,
+      t.activities,
+      t.materials,
+      t.assessment
+    ]
+  ];
+
+  dailyPlan.lessons.forEach((lesson, index) => {
+    data.push([
+      `Period ${index + 1}`,
+      `${lesson.timeStart} - ${lesson.timeEnd}`,
+      lesson.chapter || schoolInfo.subject[lang],
+      lesson.mainTopic || '',
+      lesson.studentBookPages || '',
+      lesson.objectives || '',
+      lesson.priorKnowledge || '',
+      lesson.activities || lesson.teacherGuideSteps || lesson.methodology || '',
+      lesson.materials || '',
+      lesson.assessment || ''
+    ]);
+  });
+
+  if (dailyPlan.notes) {
+    data.push([]);
+    data.push([t.notesTitle, dailyPlan.notes]);
+  }
+
+  data.push([]);
+  data.push([
+    `${t.teacherName}: ${schoolInfo.teacherName[lang]} (Date: ${dailyPlan.date})`,
+    '',
+    `${t.deptHead}: ${schoolInfo.departmentHeadName[lang]} (Approved: ______)`
+  ]);
+
+  const worksheet = XLSX.utils.aoa_to_sheet(data);
+  worksheet['!cols'] = [
+    { wch: 12 },
+    { wch: 16 },
+    { wch: 20 },
+    { wch: 30 },
+    { wch: 12 },
+    { wch: 30 },
+    { wch: 25 },
+    { wch: 35 },
+    { wch: 25 },
+    { wch: 25 }
+  ];
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Daily Plan');
+
+  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  const fileName = `Karoora_Guyyaa_${dailyPlan.date}_${lang.toUpperCase()}.xlsx`;
+
+  downloadBlob(
+    new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+    fileName,
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  );
+}
+
+// -------------------------------------------------------------
+// GENUINE ADOBE PDF (.pdf) EXPORT (jsPDF & autoTable)
+// Directly downloads authentic binary PDF files readable on all devices.
+// -------------------------------------------------------------
+
+export function exportCurriculumToPdf(
+  curriculum: CurriculumWeek[],
+  schoolInfo: SchoolInfo,
+  lang: Language
+) {
+  const t = translations[lang];
+
+  const doc = new jsPDF({
+    orientation: 'landscape',
+    unit: 'pt',
+    format: 'a4'
+  });
+
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text(schoolInfo.schoolName[lang] || 'School Name', 30, 30);
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${t.annualPlanTitle} · ${schoolInfo.academicYear[lang]} · ${schoolInfo.subject[lang]} (${schoolInfo.gradeAndSection[lang]})`, 30, 45);
+  doc.text(`${t.teacherName}: ${schoolInfo.teacherName[lang]}  |  ${t.weeklyPeriods}: ${schoolInfo.weeklyPeriods}  |  ${t.annualPeriods}: ${schoolInfo.annualPeriods}  |  ${t.deptHead}: ${schoolInfo.departmentHeadName[lang]}  |  ${t.principal}: ${schoolInfo.principalName[lang]}`, 30, 60);
+
+  const head = [[
+    t.month,
+    t.week,
+    t.date,
+    t.pages,
+    t.chapter,
+    t.mainTopic,
+    t.objectives,
+    t.priorKnowledge,
+    t.lessonOutcome,
+    t.teachingMethod,
+    t.materials,
+    t.assessment
+  ]];
+
+  const body = curriculum.map(item => [
+    item.monthName[lang] || '',
+    `W${item.weekNumber}`,
+    item.dateRange || '',
+    item.pages || '',
+    item.chapter[lang] || '',
+    item.mainTopic[lang] || '',
+    item.generalObjectives[lang] || '',
+    item.priorKnowledge[lang] || '',
+    item.lessonOutcome[lang] || '',
+    item.teachingMethod[lang] || '',
+    item.teachingAids[lang] || '',
+    item.assessment[lang] || ''
+  ]);
+
+  autoTable(doc, {
+    head: head,
+    body: body,
+    startY: 70,
+    styles: {
+      fontSize: 7,
+      cellPadding: 3,
+      overflow: 'linebreak'
+    },
+    headStyles: {
+      fillColor: [79, 70, 229],
+      textColor: 255,
+      fontStyle: 'bold',
+      halign: 'center'
+    },
+    alternateRowStyles: {
+      fillColor: [248, 250, 252]
+    },
+    margin: { top: 70, bottom: 40, left: 30, right: 30 },
+    didDrawPage: () => {
+      const pageNumber = doc.internal.pages.length - 1;
+      doc.setFontSize(7);
+      doc.setTextColor(120);
+      doc.text(`${schoolInfo.schoolName[lang]} · ${schoolInfo.academicYear[lang]} · Page ${pageNumber}`, 30, 20);
+      doc.text(`2019 A.L.I (2026/27) MoE/OEB Standard | Teacher: ${schoolInfo.teacherName[lang]} | Principal: ${schoolInfo.principalName[lang]}`, 30, doc.internal.pageSize.getHeight() - 15);
+    }
+  });
 
   const yearTag = (schoolInfo.academicYear[lang] || '2019').replace(/[^a-zA-Z0-9]/g, '_').slice(0, 15);
-  const fileName = `Karoora_Barnootaa_${yearTag}_${schoolInfo.subject[lang].replace(/\s+/g, '_')}_${lang.toUpperCase()}.xls`;
-  downloadBlob(excelHtml, fileName, 'application/vnd.ms-excel;charset=utf-8;');
+  const fileName = `Karoora_Barnootaa_${yearTag}_${schoolInfo.subject[lang].replace(/\s+/g, '_')}_${lang.toUpperCase()}.pdf`;
+  doc.save(fileName);
+}
+
+export function exportDailyPlanToPdf(
+  dailyPlan: DailyPlan,
+  schoolInfo: SchoolInfo,
+  lang: Language
+) {
+  const t = translations[lang];
+
+  const doc = new jsPDF({
+    orientation: 'landscape',
+    unit: 'pt',
+    format: 'a4'
+  });
+
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text(schoolInfo.schoolName[lang] || 'School Name', 30, 30);
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${t.dailyTitle} · ${dailyPlan.date} · ${schoolInfo.subject[lang]} (${schoolInfo.gradeAndSection[lang]})`, 30, 45);
+  doc.text(`${t.teacherName}: ${schoolInfo.teacherName[lang]}  |  ${t.deptHead}: ${schoolInfo.departmentHeadName[lang]}`, 30, 60);
+
+  const head = [[
+    t.period,
+    t.time,
+    t.chapter,
+    t.mainTopic,
+    t.pages,
+    t.objectives,
+    t.priorKnowledge,
+    t.activities,
+    t.materials,
+    t.assessment
+  ]];
+
+  const body = dailyPlan.lessons.map((lesson, idx) => [
+    `Period ${idx + 1}`,
+    `${lesson.timeStart} - ${lesson.timeEnd}`,
+    lesson.chapter || schoolInfo.subject[lang],
+    lesson.mainTopic || '',
+    lesson.studentBookPages || '',
+    lesson.objectives || '',
+    lesson.priorKnowledge || '',
+    lesson.activities || lesson.teacherGuideSteps || lesson.methodology || '',
+    lesson.materials || '',
+    lesson.assessment || ''
+  ]);
+
+  autoTable(doc, {
+    head: head,
+    body: body,
+    startY: 70,
+    styles: {
+      fontSize: 7.5,
+      cellPadding: 4,
+      overflow: 'linebreak'
+    },
+    headStyles: {
+      fillColor: [79, 70, 229],
+      textColor: 255,
+      fontStyle: 'bold',
+      halign: 'center'
+    },
+    alternateRowStyles: {
+      fillColor: [248, 250, 252]
+    },
+    margin: { top: 70, bottom: 40, left: 30, right: 30 },
+    didDrawPage: () => {
+      doc.setFontSize(7.5);
+      doc.setTextColor(120);
+      doc.text(`Daily Plan · Date: ${dailyPlan.date} · Teacher: ${schoolInfo.teacherName[lang]} · Dept Head: ${schoolInfo.departmentHeadName[lang]}`, 30, doc.internal.pageSize.getHeight() - 15);
+    }
+  });
+
+  const fileName = `Karoora_Guyyaa_${dailyPlan.date}_${lang.toUpperCase()}.pdf`;
+  doc.save(fileName);
 }
 
 // -------------------------------------------------------------
@@ -608,7 +796,7 @@ export function exportCurriculumToHtml(
 </head>
 <body>
   <div class="no-print">
-    <button onclick="window.print()">🖨️ ${escapeHtml(t.printPdf)}</button>
+    <button onclick="window.print()">Print Document</button>
   </div>
   <table>
     <thead>
@@ -666,7 +854,6 @@ export function openPrintWindow(printableElementHtml: string, title: string) {
   try {
     const printWindow = window.open('', '_blank', 'width=1100,height=800,menubar=no,toolbar=no,location=no');
     if (!printWindow) {
-      // If popup was blocked by browser
       window.print();
       return false;
     }
@@ -713,67 +900,63 @@ export function openPrintWindow(printableElementHtml: string, title: string) {
 }
 
 // -------------------------------------------------------------
-// CLIPBOARD COPY HELPER
+// JSON BACKUP & RESTORE
 // -------------------------------------------------------------
-
-export async function copyTableToClipboard(tableElement: HTMLElement): Promise<boolean> {
-  try {
-    if (navigator.clipboard && navigator.clipboard.write) {
-      const blobHtml = new Blob([tableElement.outerHTML], { type: 'text/html' });
-      const blobPlain = new Blob([tableElement.innerText], { type: 'text/plain' });
-      const item = new ClipboardItem({
-        'text/html': blobHtml,
-        'text/plain': blobPlain
-      });
-      await navigator.clipboard.write([item]);
-      return true;
-    } else {
-      // Fallback
-      await navigator.clipboard.writeText(tableElement.innerText);
-      return true;
-    }
-  } catch (err) {
-    console.warn('Clipboard write failed, using fallback copyText:', err);
-    try {
-      const textarea = document.createElement('textarea');
-      textarea.value = tableElement.innerText;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-      return true;
-    } catch (fallbackErr) {
-      console.error('All clipboard operations failed:', fallbackErr);
-      return false;
-    }
-  }
-}
 
 export function exportCurriculumToJSON(curriculum: CurriculumWeek[], schoolInfo: SchoolInfo) {
   const data = {
-    exportedAt: new Date().toISOString(),
-    version: '2019-v1',
+    exportDate: new Date().toISOString(),
+    academicYear: schoolInfo.academicYear,
     schoolInfo,
     curriculum
   };
-  const jsonContent = JSON.stringify(data, null, 2);
-  const yearTag = (schoolInfo.academicYear.om || '2019').slice(0, 4);
-  downloadBlob(jsonContent, `Karoora_Barnootaa_${yearTag}_Backup.json`, 'application/json');
+  const content = JSON.stringify(data, null, 2);
+  const fileName = `Backup_Karoora_Barnootaa_${schoolInfo.academicYear.om || '2019'}.json`;
+  downloadBlob(content, fileName, 'application/json;charset=utf-8;');
 }
 
 export function exportDailyPlanToJSON(dailyPlan: DailyPlan, schoolInfo: SchoolInfo) {
   const data = {
-    exportedAt: new Date().toISOString(),
+    exportDate: new Date().toISOString(),
     schoolInfo,
     dailyPlan
   };
-  const jsonContent = JSON.stringify(data, null, 2);
-  downloadBlob(jsonContent, `Karoora_Guyyaa_${dailyPlan.date}_Backup.json`, 'application/json');
+  const content = JSON.stringify(data, null, 2);
+  const fileName = `Backup_Karoora_Guyyaa_${dailyPlan.date}.json`;
+  downloadBlob(content, fileName, 'application/json;charset=utf-8;');
 }
 
-function escapeHtml(str: string = ''): string {
-  return (str || '')
-    .toString()
+// -------------------------------------------------------------
+// CLIPBOARD HELPER
+// -------------------------------------------------------------
+
+export async function copyTableToClipboard(tableElement: HTMLElement): Promise<boolean> {
+  try {
+    const text = tableElement.innerText;
+    const html = tableElement.outerHTML;
+
+    if (navigator.clipboard && navigator.clipboard.write) {
+      const blobText = new Blob([text], { type: 'text/plain' });
+      const blobHtml = new Blob([html], { type: 'text/html' });
+      const item = new ClipboardItem({
+        'text/plain': blobText,
+        'text/html': blobHtml
+      });
+      await navigator.clipboard.write([item]);
+      return true;
+    } else {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (err) {
+    console.error('Clipboard copy failed:', err);
+    return false;
+  }
+}
+
+function escapeHtml(str: string | undefined | null): string {
+  if (!str) return '';
+  return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')

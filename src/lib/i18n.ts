@@ -167,6 +167,8 @@ export interface TranslationStrings {
   exportWordDesc: string;
   exportExcelOption: string;
   exportExcelDesc: string;
+  exportPdfDownloadOption: string;
+  exportPdfDownloadDesc: string;
   exportHtmlOption: string;
   exportHtmlDesc: string;
   copyTableClipboard: string;
@@ -337,10 +339,12 @@ export const translations: Record<Language, TranslationStrings> = {
     printDocumentDaily: 'Karoora Guyyaa (Daily Plan)',
     curriculumFrameworkNotice: 'Sirna Barnootaa Biyyooleessaa Itoophiyaa 2019 A.L.I (MoE / BBO Curriculum Standard)',
     pageHeaderTitle: 'Mata Duree Maxxansaa Seera Qabeessa',
-    exportWordOption: 'Waraqaa Word (.doc)',
-    exportWordDesc: 'Garee Microsoft Word fi Google Docs keessatti gulaalamu',
-    exportExcelOption: 'Gabatee Excel (.xls)',
-    exportExcelDesc: 'Gabatee qulqulluu sarara fi kallaattii qabu',
+    exportWordOption: 'Waraqaa Word (.docx)',
+    exportWordDesc: 'Garee Microsoft Word fi Google Docs keessatti seeraan banamu (.docx)',
+    exportExcelOption: 'Gabatee Excel (.xlsx)',
+    exportExcelDesc: 'Gabatee qulqulluu Excel fi Google Sheets keessatti banamu (.xlsx)',
+    exportPdfDownloadOption: 'Galmee PDF Buufadhu (.pdf)',
+    exportPdfDownloadDesc: 'Galmee PDF qulqullina olaanaa qabu kallattiin buusi (Adobe, Browser)',
     exportHtmlOption: 'Faayila HTML (.html)',
     exportHtmlDesc: 'Fuula marsariitii offline ta\'ee maxxanfamuu danda\'u',
     copyTableClipboard: 'Gabatee Garagalchi',
@@ -510,10 +514,12 @@ export const translations: Record<Language, TranslationStrings> = {
     printDocumentDaily: 'የዕለት ዕቅድ (Daily Plan)',
     curriculumFrameworkNotice: 'የ2019 ዓ.ም የኢትዮጵያ ሥርዓተ ትምህርት ማዕቀፍ (MoE / OEB Standard)',
     pageHeaderTitle: 'ይፋዊ የህትመት ራስጌ',
-    exportWordOption: 'የዎርድ ሰነድ (.doc)',
-    exportWordDesc: 'በ Microsoft Word እና Google Docs በቀላሉ የሚስተካከል ቅርጸት',
-    exportExcelOption: 'የኤክሴል ሰንጠረዥ (.xls)',
-    exportExcelDesc: 'መስመርና ቀለማት የተስተካከሉለት የ Excel ፋይል',
+    exportWordOption: 'የዎርድ ሰነድ (.docx)',
+    exportWordDesc: 'በ Microsoft Word እና Google Docs በቀላሉ የሚከፈት ትክክለኛ ቅርጸት (.docx)',
+    exportExcelOption: 'የኤክሴል ሰንጠረዥ (.xlsx)',
+    exportExcelDesc: 'መስመርና ቀለማት የተስተካከሉለት የ Excel ፋይል (.xlsx)',
+    exportPdfDownloadOption: 'የፒዲኤፍ ሰነድ አውርድ (.pdf)',
+    exportPdfDownloadDesc: 'ትክክለኛ የፒዲኤፍ ሰነድ በቀጥታ ያውርዱ (በማንኛውም መሳሪያ ያለምንም እንከን ይከፈታል)',
     exportHtmlOption: 'የድር ሰነድ (.html)',
     exportHtmlDesc: 'ያለ ኢንተርኔት (Offline) የሚታይና የሚታተም ገጽ',
     copyTableClipboard: 'ሰንጠረዡን ቅዳ',
@@ -683,10 +689,12 @@ export const translations: Record<Language, TranslationStrings> = {
     printDocumentDaily: 'Daily Lesson Plan',
     curriculumFrameworkNotice: '2019 E.C. (2026/27) Ethiopian Curriculum Framework (MoE / OEB Standard)',
     pageHeaderTitle: 'Official Running Print Header',
-    exportWordOption: 'Word Document (.doc)',
-    exportWordDesc: 'Editable tabular document for Microsoft Word & Google Docs',
-    exportExcelOption: 'Excel Spreadsheet (.xls)',
-    exportExcelDesc: 'Formatted spreadsheet with styling, borders & columns',
+    exportWordOption: 'Word Document (.docx)',
+    exportWordDesc: 'Native OpenXML document for Microsoft Word & Google Docs (.docx)',
+    exportExcelOption: 'Excel Spreadsheet (.xlsx)',
+    exportExcelDesc: 'Native OpenXML spreadsheet for Microsoft Excel & Google Sheets (.xlsx)',
+    exportPdfDownloadOption: 'Download PDF Document (.pdf)',
+    exportPdfDownloadDesc: 'Direct authentic PDF document (opens in Acrobat, Chrome, Android, iOS)',
     exportHtmlOption: 'Standalone Webpage (.html)',
     exportHtmlDesc: 'Offline-ready standalone printable webpage file',
     copyTableClipboard: 'Copy Table',
