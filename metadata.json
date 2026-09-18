@@ -1,6 +1,6 @@
 {
   "name": "Lesson Planner",
-  "description": "Trilingual (Afaan Oromo, Amharic, English) annual and daily lesson planner based on the 2016 Ethiopian Grade 5 Mathematics curriculum with PDF printing and export capabilities.",
+  "description": "Trilingual (Afaan Oromo, Amharic, English) annual and daily lesson planner based on the 2019 E.C. (2026/27) Ethiopian Grade 5 Mathematics curriculum with multi-page official print and universal export capabilities.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

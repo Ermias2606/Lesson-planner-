@@ -153,9 +153,9 @@ export default function ClassManagerModal({
         en: 'Primary School'
       },
       academicYear: currentSchool?.academicYear || {
-        om: '2016 B.A (2023/24)',
-        am: '2016 ዓ.ም (2023/24)',
-        en: '2016 E.C (2023/24)'
+        om: '2019 A.L.I (2026/27)',
+        am: '2019 ዓ.ም (2026/27)',
+        en: '2019 E.C. (2026/27 G.C.)'
       },
       teacherName: {
         om: teacherName.trim() || currentSchool?.teacherName.om || 'Barsiisaa',

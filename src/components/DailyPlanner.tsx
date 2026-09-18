@@ -17,7 +17,8 @@ import {
   Check,
   GraduationCap,
   Bookmark,
-  FileText
+  FileText,
+  Download
 } from 'lucide-react';
 import { DailyPlan, Lesson, CurriculumWeek, Language } from '../types';
 import { getDailyPlan, saveDailyPlan, getCurriculum, getActiveCourse, getCourses } from '../lib/storage';
@@ -32,6 +33,7 @@ interface DailyPlannerProps {
   initialCurriculumWeek?: CurriculumWeek | null;
   onClearInitialWeek?: () => void;
   onOpenPrintView?: () => void;
+  onOpenExportModal?: (docType?: 'annual' | 'daily') => void;
 }
 
 export default function DailyPlanner({ 
@@ -39,7 +41,8 @@ export default function DailyPlanner({
   activeCourseId,
   initialCurriculumWeek, 
   onClearInitialWeek,
-  onOpenPrintView 
+  onOpenPrintView,
+  onOpenExportModal
 }: DailyPlannerProps) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [plan, setPlan] = useState<DailyPlan>(() => getDailyPlan(format(new Date(), 'yyyy-MM-dd'), language, activeCourseId));
@@ -329,12 +332,24 @@ export default function DailyPlanner({
             <span className="sm:hidden">{t.importFromAnnual.slice(0, 10)}...</span>
           </button>
 
+          {/* Export Daily Plan Button */}
+          <button
+            onClick={() => onOpenExportModal ? onOpenExportModal('daily') : onOpenPrintView ? onOpenPrintView() : window.print()}
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+            title={t.exportBtn}
+          >
+            <Download size={14} />
+            <span className="hidden sm:inline">{t.exportBtn}</span>
+          </button>
+
+          {/* Print / PDF Daily Plan Button */}
           <button
             onClick={() => onOpenPrintView ? onOpenPrintView() : window.print()}
-            className="p-2 text-gray-600 hover:text-gray-900 bg-slate-100 hover:bg-slate-200 rounded-lg border border-gray-200 text-xs font-medium cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
             title={t.printPdf}
           >
-            <Printer size={16} />
+            <Printer size={14} />
+            <span className="hidden sm:inline">{t.printPdf}</span>
           </button>
         </div>
       </div>

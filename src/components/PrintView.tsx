@@ -1,8 +1,30 @@
 import React, { useRef, useState } from 'react';
-import { Printer, X, FileSpreadsheet, Globe, CalendarDays, CalendarSync, CheckCircle2, Sliders, Layers } from 'lucide-react';
+import { 
+  Printer, 
+  X, 
+  FileSpreadsheet, 
+  Globe, 
+  CalendarDays, 
+  CalendarSync, 
+  CheckCircle2, 
+  Sliders, 
+  Layers,
+  FileText,
+  Copy,
+  ExternalLink,
+  Check
+} from 'lucide-react';
 import { CurriculumWeek, SchoolInfo, Language, DailyPlan } from '../types';
 import { translations } from '../lib/i18n';
-import { exportCurriculumToCSV } from '../lib/exportUtils';
+import { 
+  exportCurriculumToCSV, 
+  exportDailyPlanToCSV,
+  exportCurriculumToWord,
+  exportDailyPlanToWord,
+  exportCurriculumToExcel,
+  openPrintWindow,
+  copyTableToClipboard
+} from '../lib/exportUtils';
 import { getDailyPlan } from '../lib/storage';
 import { format } from 'date-fns';
 
@@ -30,18 +52,68 @@ export default function PrintView({
   const printContentRef = useRef<HTMLDivElement>(null);
   const [docType, setDocType] = useState<'annual' | 'daily'>(initialDocumentType);
   const [headerDensity, setHeaderDensity] = useState<'full' | 'compact'>('full');
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
 
   const t = translations[language];
 
   // If dailyPlan not passed directly, load today's plan
   const dailyPlan = initialDailyPlan || getDailyPlan(format(new Date(), 'yyyy-MM-dd'), language, activeCourseId);
 
+  const showNotice = (msg: string) => {
+    setActionNotice(msg);
+    setTimeout(() => setActionNotice(null), 3000);
+  };
+
   const handlePrint = () => {
     window.print();
   };
 
+  const handleOpenCleanWindow = () => {
+    if (printContentRef.current) {
+      const docTitle = `${schoolInfo.schoolName[language]} - ${docType === 'annual' ? t.annualPlanTitle : t.printDocumentDaily}`;
+      openPrintWindow(printContentRef.current.innerHTML, docTitle);
+    } else {
+      window.print();
+    }
+  };
+
+  const handleCopyTable = async () => {
+    if (printContentRef.current) {
+      const ok = await copyTableToClipboard(printContentRef.current);
+      if (ok) {
+        setCopySuccess(true);
+        showNotice(t.copiedToClipboard);
+        setTimeout(() => setCopySuccess(false), 2500);
+      }
+    }
+  };
+
+  const handleExportWord = () => {
+    if (docType === 'annual') {
+      exportCurriculumToWord(curriculum, schoolInfo, language);
+    } else {
+      exportDailyPlanToWord(dailyPlan, schoolInfo, language);
+    }
+    showNotice(t.exportWordOption);
+  };
+
+  const handleExportExcel = () => {
+    if (docType === 'annual') {
+      exportCurriculumToExcel(curriculum, schoolInfo, language);
+    } else {
+      exportDailyPlanToCSV(dailyPlan, schoolInfo, language);
+    }
+    showNotice(t.exportExcelOption);
+  };
+
   const handleExportCsv = () => {
-    exportCurriculumToCSV(curriculum, schoolInfo, language);
+    if (docType === 'annual') {
+      exportCurriculumToCSV(curriculum, schoolInfo, language);
+    } else {
+      exportDailyPlanToCSV(dailyPlan, schoolInfo, language);
+    }
+    showNotice(t.exportCsvOption);
   };
 
   // Bureau Header Title based on language
@@ -57,16 +129,19 @@ export default function PrintView({
 
   const getCurriculumStandardNotice = () => {
     if (language === 'am') {
-      return 'የ2016 ዓ.ም የኢትዮጵያ ሥርዓተ ትምህርት ማዕቀፍ · የ5ኛ ክፍል ሒሳብ መማሪያ (164 ገጾች)';
+      return `የኢትዮጵያ አዲሱ ሥርዓተ ትምህርት ማዕቀፍ (${schoolInfo.academicYear.am}) · ${schoolInfo.gradeAndSection.am} ${schoolInfo.subject.am}`;
     }
     if (language === 'en') {
-      return '2016 Ethiopian Curriculum Framework · Grade 5 Mathematics (Student Textbook: 164 pp.)';
+      return `Ethiopian National Curriculum Framework (${schoolInfo.academicYear.en}) · ${schoolInfo.gradeAndSection.en} ${schoolInfo.subject.en}`;
     }
-    return 'Sirna Barnootaa Itoophiyaa 2016 A.L.I · Kitaaba Herregaa Kutaa 5ffaa (Fuula 164)';
+    return `Sirna Barnootaa Biyyooleessaa Itoophiyaa (${schoolInfo.academicYear.om}) · ${schoolInfo.gradeAndSection.om} ${schoolInfo.subject.om}`;
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex flex-col items-center justify-start p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:static print:inset-auto print:overflow-visible">
+    <div 
+      id="print-modal-overlay"
+      className="print-modal-overlay fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex flex-col items-center justify-start p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:static print:inset-auto print:overflow-visible"
+    >
       
       {/* Top action bar (hidden during browser print) */}
       <div className="w-full max-w-7xl bg-white rounded-t-xl p-3 sm:p-4 flex flex-wrap justify-between items-center gap-3 border-b shadow-xl print:hidden sticky top-0 z-20">
@@ -95,7 +170,7 @@ export default function PrintView({
           <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-gray-200">
             <button
               onClick={() => setDocType('annual')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-all ${
+              className={`px-2.5 py-1 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-all cursor-pointer ${
                 docType === 'annual' ? 'bg-white text-indigo-700 shadow-2xs font-bold' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -104,7 +179,7 @@ export default function PrintView({
             </button>
             <button
               onClick={() => setDocType('daily')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-all ${
+              className={`px-2.5 py-1 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-all cursor-pointer ${
                 docType === 'daily' ? 'bg-white text-indigo-700 shadow-2xs font-bold' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -118,14 +193,14 @@ export default function PrintView({
             <Sliders size={13} className="text-gray-500 ml-1.5 mr-1" />
             <button
               onClick={() => setHeaderDensity('full')}
-              className={`px-2 py-1 text-xs font-semibold rounded ${headerDensity === 'full' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-gray-600'}`}
+              className={`px-2 py-1 text-xs font-semibold rounded cursor-pointer ${headerDensity === 'full' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-gray-600'}`}
               title="Full institutional metadata grid on every page"
             >
               Full Header
             </button>
             <button
               onClick={() => setHeaderDensity('compact')}
-              className={`px-2 py-1 text-xs font-semibold rounded ${headerDensity === 'compact' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-gray-600'}`}
+              className={`px-2 py-1 text-xs font-semibold rounded cursor-pointer ${headerDensity === 'compact' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-gray-600'}`}
               title="Compact 2-line header on every page"
             >
               Compact
@@ -137,34 +212,65 @@ export default function PrintView({
             <Globe size={13} className="text-gray-500 ml-1 mr-1" />
             <button
               onClick={() => onLanguageChange('om')}
-              className={`px-2 py-1 text-xs font-semibold rounded ${language === 'om' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-gray-600'}`}
+              className={`px-2 py-1 text-xs font-semibold rounded cursor-pointer ${language === 'om' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-gray-600'}`}
             >
               Oromo
             </button>
             <button
               onClick={() => onLanguageChange('am')}
-              className={`px-2 py-1 text-xs font-semibold rounded ${language === 'am' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-gray-600'}`}
+              className={`px-2 py-1 text-xs font-semibold rounded cursor-pointer ${language === 'am' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-gray-600'}`}
             >
               አማርኛ
             </button>
             <button
               onClick={() => onLanguageChange('en')}
-              className={`px-2 py-1 text-xs font-semibold rounded ${language === 'en' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-gray-600'}`}
+              className={`px-2 py-1 text-xs font-semibold rounded cursor-pointer ${language === 'en' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-gray-600'}`}
             >
               English
             </button>
           </div>
 
-          {docType === 'annual' && (
-            <button
-              onClick={handleExportCsv}
-              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors"
-            >
-              <FileSpreadsheet size={14} />
-              <span className="hidden sm:inline">{t.exportCsv}</span>
-            </button>
-          )}
+          {/* Export to Word (.doc) */}
+          <button
+            onClick={handleExportWord}
+            className="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
+            title={t.exportWordOption}
+          >
+            <FileText size={14} />
+            <span className="hidden md:inline">Word (.doc)</span>
+          </button>
 
+          {/* Export to Excel (.xls) */}
+          <button
+            onClick={handleExportExcel}
+            className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
+            title={t.exportExcelOption}
+          >
+            <FileSpreadsheet size={14} />
+            <span className="hidden md:inline">Excel (.xls)</span>
+          </button>
+
+          {/* Copy Table to Clipboard */}
+          <button
+            onClick={handleCopyTable}
+            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-gray-700 border border-gray-300 rounded-lg text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
+            title={t.copyTableClipboard}
+          >
+            {copySuccess ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+            <span className="hidden lg:inline">{copySuccess ? t.copiedToClipboard : t.copyTableClipboard}</span>
+          </button>
+
+          {/* Clean Window Print (for iframe sandbox bypass) */}
+          <button
+            onClick={handleOpenCleanWindow}
+            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+            title={t.openPrintWindowDesc}
+          >
+            <ExternalLink size={13} />
+            <span className="hidden sm:inline">{t.openPrintWindow}</span>
+          </button>
+
+          {/* Native Print Dialog */}
           <button
             onClick={handlePrint}
             className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
@@ -175,14 +281,14 @@ export default function PrintView({
 
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors ml-1"
+            className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors ml-1 cursor-pointer"
           >
             <X size={20} />
           </button>
         </div>
       </div>
 
-      {/* Screen Helper Info Banner */}
+      {/* Screen Helper Info & Feedback Banner */}
       <div className="w-full max-w-7xl bg-indigo-50 border-x border-b border-indigo-100 p-2.5 px-4 text-xs text-indigo-950 flex flex-wrap items-center justify-between gap-2 print:hidden">
         <div className="flex items-center gap-2">
           <Layers size={14} className="text-indigo-600 shrink-0" />
@@ -190,15 +296,24 @@ export default function PrintView({
             <strong>Multi-Page Layout Active:</strong> The institutional school header is placed directly in the table header group (<code>&lt;thead&gt;</code>) so it <strong>repeats at the top of every printed page</strong> automatically.
           </span>
         </div>
-        <span className="text-[11px] text-indigo-700 font-medium bg-white px-2 py-0.5 rounded border border-indigo-200">
-          Orientation: A4 Landscape
-        </span>
+        <div className="flex items-center gap-2">
+          {actionNotice && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 animate-in fade-in">
+              <Check size={12} />
+              {actionNotice}
+            </span>
+          )}
+          <span className="text-[11px] text-indigo-700 font-medium bg-white px-2 py-0.5 rounded border border-indigo-200">
+            Orientation: A4 Landscape
+          </span>
+        </div>
       </div>
 
       {/* Printable Sheet Container */}
       <div 
         ref={printContentRef}
-        className="w-full max-w-7xl bg-white p-4 sm:p-8 rounded-b-xl shadow-2xl print:shadow-none print:p-0 text-black font-sans print:w-full print:max-w-none print:static"
+        id="printable-content"
+        className="print-content-sheet w-full max-w-7xl bg-white p-4 sm:p-8 rounded-b-xl shadow-2xl print:shadow-none print:p-0 text-black font-sans print:w-full print:max-w-none print:static"
       >
         {docType === 'annual' ? (
           /* =========================================================
@@ -336,7 +451,7 @@ export default function PrintView({
                   <td colSpan={12} className="p-1 border border-black text-[8px] text-gray-700 bg-white">
                     <div className="flex justify-between items-center">
                       <span>
-                        <strong>Curriculum Standard:</strong> 2016 Ethiopian Curriculum Framework · Grade 5 Mathematics (OEB)
+                        <strong>Curriculum Standard:</strong> {getCurriculumStandardNotice()}
                       </span>
                       <span>
                         <strong>School:</strong> {schoolInfo.schoolName[language]} ({schoolInfo.academicYear[language]})
@@ -510,13 +625,13 @@ export default function PrintView({
                   <td colSpan={6} className="p-1 border border-black text-[8px] text-gray-700 bg-white">
                     <div className="flex justify-between items-center">
                       <span>
-                        <strong>Curriculum Standard:</strong> 2016 Ethiopian Curriculum Framework · Daily Plan Log
+                        <strong>Curriculum Standard:</strong> {getCurriculumStandardNotice()}
                       </span>
                       <span>
                         <strong>School:</strong> {schoolInfo.schoolName[language]}
                       </span>
                       <span>
-                        <strong>Approved by Dept Head:</strong> ________________________ (Date: ____/____/2016)
+                        <strong>Approved by Dept Head:</strong> ________________________ (Date: ____/____/{schoolInfo.academicYear[language]})
                       </span>
                     </div>
                   </td>
@@ -535,21 +650,21 @@ export default function PrintView({
             <p className="font-bold text-black uppercase tracking-wider text-[10px]">{t.teacherName}</p>
             <p className="mt-1 font-semibold text-gray-900">{schoolInfo.teacherName[language]}</p>
             <p className="mt-3 text-[10px]">{t.signature}: _____________________________</p>
-            <p className="mt-1.5 text-[10px]">{t.date}: _____ / _____ / 2016 A.L.I</p>
+            <p className="mt-1.5 text-[10px]">{t.date}: _____ / _____ / {schoolInfo.academicYear[language]}</p>
           </div>
 
           <div className="border border-gray-300 p-2.5 rounded bg-gray-50/40">
             <p className="font-bold text-black uppercase tracking-wider text-[10px]">{t.deptHead}</p>
             <p className="mt-1 font-semibold text-gray-900">{schoolInfo.departmentHeadName[language]}</p>
             <p className="mt-3 text-[10px]">{t.signature}: _____________________________</p>
-            <p className="mt-1.5 text-[10px]">{t.date}: _____ / _____ / 2016 A.L.I</p>
+            <p className="mt-1.5 text-[10px]">{t.date}: _____ / _____ / {schoolInfo.academicYear[language]}</p>
           </div>
 
           <div className="border border-gray-300 p-2.5 rounded bg-gray-50/40">
             <p className="font-bold text-black uppercase tracking-wider text-[10px]">{t.principal}</p>
             <p className="mt-1 font-semibold text-gray-900">{schoolInfo.principalName[language]}</p>
             <p className="mt-3 text-[10px]">{t.signature}: _____________________________</p>
-            <p className="mt-1.5 text-[10px]">{t.date}: _____ / _____ / 2016 A.L.I</p>
+            <p className="mt-1.5 text-[10px]">{t.date}: _____ / _____ / {schoolInfo.academicYear[language]}</p>
           </div>
         </div>
 

@@ -16,7 +16,28 @@ export function getCourses(): Course[] {
     }
     const parsed = JSON.parse(data);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
+      // Migrate any legacy 2016 academic year to present 2019
+      const migrated = parsed.map((course: Course) => {
+        if (
+          course.schoolInfo?.academicYear?.om?.includes('2016') ||
+          course.schoolInfo?.academicYear?.am?.includes('2016') ||
+          course.schoolInfo?.academicYear?.en?.includes('2016')
+        ) {
+          return {
+            ...course,
+            schoolInfo: {
+              ...course.schoolInfo,
+              academicYear: {
+                om: '2019 A.L.I (2026/27)',
+                am: '2019 ዓ.ም (2026/27)',
+                en: '2019 E.C. (2026/2027 G.C.)'
+              }
+            }
+          };
+        }
+        return course;
+      });
+      return migrated;
     }
     saveCourses(DEFAULT_INITIAL_COURSES);
     return DEFAULT_INITIAL_COURSES;
@@ -191,13 +212,15 @@ export function getSchoolInfo(courseId?: string): SchoolInfo {
   const targetId = courseId || getActiveCourseId();
 
   try {
+    let resultInfo = initialSchoolInfo;
+
     // Check legacy for g5-math
     if (targetId === 'g5-math') {
       const legacyData = localStorage.getItem('school_info_2016_v2');
       if (legacyData) {
         const parsed = JSON.parse(legacyData);
         if (parsed && typeof parsed.schoolName === 'object') {
-          return { ...initialSchoolInfo, ...parsed };
+          resultInfo = { ...initialSchoolInfo, ...parsed };
         }
       }
     }
@@ -206,18 +229,35 @@ export function getSchoolInfo(courseId?: string): SchoolInfo {
     if (courseData) {
       const parsed = JSON.parse(courseData);
       if (parsed && typeof parsed.schoolName === 'object') {
-        return { ...initialSchoolInfo, ...parsed };
+        resultInfo = { ...initialSchoolInfo, ...parsed };
+      }
+    } else if (resultInfo === initialSchoolInfo) {
+      // Default to the course's school info from courses registry
+      const courses = getCourses();
+      const course = courses.find(c => c.id === targetId);
+      if (course && course.schoolInfo) {
+        resultInfo = course.schoolInfo;
       }
     }
 
-    // Default to the course's school info from courses registry
-    const courses = getCourses();
-    const course = courses.find(c => c.id === targetId);
-    if (course && course.schoolInfo) {
-      return course.schoolInfo;
+    // Automatically update legacy 2016 academic year to present 2019 A.L.I (2026/27 G.C.)
+    if (
+      resultInfo.academicYear?.om?.includes('2016') ||
+      resultInfo.academicYear?.am?.includes('2016') ||
+      resultInfo.academicYear?.en?.includes('2016')
+    ) {
+      resultInfo = {
+        ...resultInfo,
+        academicYear: {
+          om: '2019 A.L.I (2026/27)',
+          am: '2019 ዓ.ም (2026/27)',
+          en: '2019 E.C. (2026/2027 G.C.)'
+        }
+      };
+      saveSchoolInfo(resultInfo, targetId);
     }
 
-    return initialSchoolInfo;
+    return resultInfo;
   } catch (e) {
     console.error(`Failed to parse school info for course ${targetId}`, e);
     return initialSchoolInfo;

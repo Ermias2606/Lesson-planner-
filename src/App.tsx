@@ -8,7 +8,8 @@ import {
   Globe,
   Check,
   Layers,
-  Rocket
+  Rocket,
+  BookOpen
 } from 'lucide-react';
 import { ViewMode, CurriculumWeek, Language, Course } from './types';
 import AnnualPlanner from './components/AnnualPlanner';
@@ -18,6 +19,7 @@ import ExportModal from './components/ExportModal';
 import ClassHeaderSelector from './components/ClassHeaderSelector';
 import ClassManagerModal from './components/ClassManagerModal';
 import DeployGuideModal from './components/DeployGuideModal';
+import UserManualModal from './components/UserManualModal';
 import { PWAInstallButton } from './components/PWAInstallButton';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { 
@@ -40,13 +42,20 @@ export default function App() {
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [printModalType, setPrintModalType] = useState<'annual' | 'daily'>('annual');
   const [showExportModal, setShowExportModal] = useState(false);
+  const [exportModalType, setExportModalType] = useState<'annual' | 'daily'>('annual');
   const [showDeployModal, setShowDeployModal] = useState(false);
+  const [showManualModal, setShowManualModal] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [isClassModalOpen, setIsClassModalOpen] = useState(false);
 
   const handleOpenPrint = (type?: 'annual' | 'daily') => {
     setPrintModalType(type || (viewMode === 'daily' ? 'daily' : 'annual'));
     setShowPrintModal(true);
+  };
+
+  const handleOpenExport = (type?: 'annual' | 'daily') => {
+    setExportModalType(type || (viewMode === 'daily' ? 'daily' : 'annual'));
+    setShowExportModal(true);
   };
 
   // Multi-Course and Multi-Class State
@@ -226,7 +235,7 @@ export default function App() {
 
               {/* Export Button */}
               <button
-                onClick={() => setShowExportModal(true)}
+                onClick={() => handleOpenExport()}
                 className="p-2 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors flex items-center gap-1.5 border border-emerald-200 cursor-pointer"
                 title={t.exportBtn}
               >
@@ -236,6 +245,16 @@ export default function App() {
 
               {/* In-App PWA Offline Install Button */}
               <PWAInstallButton language={language} />
+
+              {/* User Manual Guide Button */}
+              <button
+                onClick={() => setShowManualModal(true)}
+                className="p-2 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors flex items-center gap-1.5 border border-indigo-200 cursor-pointer"
+                title={t.userManual}
+              >
+                <BookOpen size={15} />
+                <span className="hidden lg:inline">{t.userManual}</span>
+              </button>
 
               {/* Deploy Guide Button */}
               <button
@@ -273,7 +292,7 @@ export default function App() {
             onCourseUpdated={handleCourseUpdated}
             onSelectWeekForDailyPlan={handleSelectWeekForDaily}
             onOpenPrintView={() => handleOpenPrint('annual')}
-            onOpenExportModal={() => setShowExportModal(true)}
+            onOpenExportModal={() => handleOpenExport('annual')}
           />
         ) : (
           <DailyPlanner 
@@ -282,6 +301,7 @@ export default function App() {
             initialCurriculumWeek={selectedWeekForDaily}
             onClearInitialWeek={() => setSelectedWeekForDaily(null)}
             onOpenPrintView={() => handleOpenPrint('daily')}
+            onOpenExportModal={() => handleOpenExport('daily')}
           />
         )}
       </main>
@@ -310,7 +330,11 @@ export default function App() {
           curriculum={curriculum}
           schoolInfo={schoolInfo}
           language={language}
-          onOpenPrintView={() => setShowPrintModal(true)}
+          initialDocumentType={exportModalType}
+          activeCourseId={activeCourseId}
+          onOpenPrintView={(docType) => {
+            handleOpenPrint(docType || exportModalType);
+          }}
         />
       )}
 
@@ -334,6 +358,13 @@ export default function App() {
       <DeployGuideModal
         isOpen={showDeployModal}
         onClose={() => setShowDeployModal(false)}
+        language={language}
+      />
+
+      {/* Comprehensive User Manual Modal */}
+      <UserManualModal
+        isOpen={showManualModal}
+        onClose={() => setShowManualModal(false)}
         language={language}
       />
 

@@ -7,9 +7,9 @@ export const initialSchoolInfo: SchoolInfo = {
     en: 'Salayish Pre-primary, Primary and Middle School'
   },
   academicYear: {
-    om: '2016 A.L.I',
-    am: '2016 ዓ.ም',
-    en: '2016 E.C. (2023/24 G.C.)'
+    om: '2019 A.L.I (2026/27)',
+    am: '2019 ዓ.ም (2026/27)',
+    en: '2019 E.C. (2026/2027 G.C.)'
   },
   teacherName: {
     om: 'Barsiisaa / Barsiistuu Herregaa',
@@ -2029,13 +2029,13 @@ const RAW_CURRICULUM_2016: CurriculumWeek[] = [
     semester: 2,
     monthIndex: 9,
     weekNumber: 4,
-    dateRange: '24 - 30 (Waxabajjii 30/2016)',
+    dateRange: '24 - 30 (Waxabajjii 30/2019)',
     pages: '-',
     monthName: { om: 'Waxabajjii', am: 'ሰኔ', en: 'Sene (Jun)' },
     chapter: { om: 'Ripportii', am: 'ሪፖርት ካርድ', en: 'Report' },
     mainTopic: {
       om: 'Guyyaa Kaardii fi Ripportii Barattootaaf Itti Kennamu (Waxabajjii 30)',
-      am: 'ሪፖርት ካርድ ለተማሪ ወላጆች የሚሰጥበት ቀን (ሰኔ 30/2016 ዓ.ም)',
+      am: 'ሪፖርት ካርድ ለተማሪ ወላጆች የሚሰጥበት ቀን (ሰኔ 30/2019 ዓ.ም)',
       en: 'Annual Report Card Distribution Day (Sene 30 / June 30)'
     },
     generalObjectives: {
@@ -2045,7 +2045,7 @@ const RAW_CURRICULUM_2016: CurriculumWeek[] = [
     },
     priorKnowledge: { om: '-', am: '-', en: '-' },
     lessonOutcome: {
-      om: 'Barattoonni fi maatiin kaardii bu\'aa waggaa fudhatu; sagantaan bara 2016 ni xumurama.',
+      om: 'Barattoonni fi maatiin kaardii bu\'aa waggaa fudhatu; sagantaan bara 2019 ni xumurama.',
       am: 'ተማሪዎችና ወላጆች የዓመቱን ሪፖርት ካርድ ተቀብለው የትምህርት ዘመኑ ይጠናቀቃል።',
       en: 'Annual school year formally closes; student promotion determined.'
     },

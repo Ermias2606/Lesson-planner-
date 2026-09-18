@@ -97,6 +97,7 @@ export interface TranslationStrings {
   prevDay: string;
   nextDay: string;
   period: string;
+  time: string;
   activities: string;
   notesTitle: string;
   notesPlaceholder: string;
@@ -162,11 +163,26 @@ export interface TranslationStrings {
   printDocumentDaily: string;
   curriculumFrameworkNotice: string;
   pageHeaderTitle: string;
+  exportWordOption: string;
+  exportWordDesc: string;
+  exportExcelOption: string;
+  exportExcelDesc: string;
+  exportHtmlOption: string;
+  exportHtmlDesc: string;
+  copyTableClipboard: string;
+  copiedToClipboard: string;
+  openPrintWindow: string;
+  openPrintWindowDesc: string;
+  downloadCompleteDoc: string;
+  exportDailyCsvOption: string;
+  userManual: string;
+  userManualTitle: string;
+  userManualDesc: string;
 }
 
 export const translations: Record<Language, TranslationStrings> = {
   om: {
-    appTitle: 'Karoora Barnootaa 2016',
+    appTitle: 'Karoora Barnootaa 2019 (2026/27)',
     appSubtitle: 'Herrega Kutaa 5ffaa (Mathematics Grade 5)',
     dailyView: 'Sagantaa Guyyaa',
     annualView: 'Karoora Waggaa',
@@ -182,8 +198,8 @@ export const translations: Record<Language, TranslationStrings> = {
     filter: 'Filtarii',
     all: 'Hunda',
     reset: 'Deebisii Jalqabsiisi',
-    confirmReset: 'Karoora barnootaa waggaa gara qophii duraatti (2016 Official Curriculum) deebisuu barbaadduu?',
-    resetSuccess: 'Karoorri waggaa 2016 gara qophii duraatti deebi\'eera.',
+    confirmReset: 'Karoora barnootaa waggaa gara qophii duraatti (Official Curriculum Standard) deebisuu barbaadduu?',
+    resetSuccess: 'Karoorri waggaa gara qophii duraatti deebi\'eera.',
     weekUpdateSuccess: 'Karoorri torbee milkaa\'inaan haaromfameera.',
     schoolInfoUpdateSuccess: 'Odeeffannoon mana barumsaa haaromfameera.',
 
@@ -253,16 +269,17 @@ export const translations: Record<Language, TranslationStrings> = {
     importFromAnnual: 'Karoora Waggaa Irraa Waraabi',
     addLesson: 'Wayitii Haaraa Dabali',
     noDailyLessons: 'Sagantaan barnootaa hin jiru',
-    noDailyLessonsDesc: 'Karoora barnootaa waggaa 2016 irraa battalumatti waraabaa ykn ofumaa haaraa dabalaa.',
+    noDailyLessonsDesc: 'Karoora barnootaa waggaa irraa battalumatti waraabaa ykn ofumaa haaraa dabalaa.',
     prevDay: 'Guyyaa Duraa',
     nextDay: 'Guyyaa Itti Aanu',
     period: 'Wayitii',
+    time: 'Yeroo',
     activities: 'Adeemsa fi Sochiiwwan Barnootaa (Daqiiqaa 45)',
     notesTitle: 'Yaadannoo fi Hubachiisa Guyyaa',
     notesPlaceholder: 'Hirmaannaa barattootaa, hojii manaa, hubannoo daree, kkf...',
     completed: 'Xumurameera',
     notCompleted: 'Hin xumuramne',
-    selectWeekModalTitle: 'Karoora Barnootaa Waggaa 2016 Irraa Filadhu',
+    selectWeekModalTitle: 'Karoora Barnootaa Waggaa Irraa Filadhu',
     selectWeekModalDesc: 'Mata duree barbaaddan filachuun sagantaa guyyaatti waraabaa.',
     selectBtn: 'Filadhu',
     duration45Min: '(Daqiiqaa 45)',
@@ -318,12 +335,27 @@ export const translations: Record<Language, TranslationStrings> = {
     printRunningHeaderNotice: 'Mata dureen mana barumsaa seera qabeessi kun fuula maxxansaa hundarratti ofumaan irra deebi\'ee mul\'ata.',
     printDocumentAnnual: 'Karoora Waggaa (Annual Plan)',
     printDocumentDaily: 'Karoora Guyyaa (Daily Plan)',
-    curriculumFrameworkNotice: 'Sirna Barnootaa Itoophiyaa 2016 A.L.I (MoE / BBO Curriculum Standard)',
-    pageHeaderTitle: 'Mata Duree Maxxansaa Seera Qabeessa'
+    curriculumFrameworkNotice: 'Sirna Barnootaa Biyyooleessaa Itoophiyaa 2019 A.L.I (MoE / BBO Curriculum Standard)',
+    pageHeaderTitle: 'Mata Duree Maxxansaa Seera Qabeessa',
+    exportWordOption: 'Waraqaa Word (.doc)',
+    exportWordDesc: 'Garee Microsoft Word fi Google Docs keessatti gulaalamu',
+    exportExcelOption: 'Gabatee Excel (.xls)',
+    exportExcelDesc: 'Gabatee qulqulluu sarara fi kallaattii qabu',
+    exportHtmlOption: 'Faayila HTML (.html)',
+    exportHtmlDesc: 'Fuula marsariitii offline ta\'ee maxxanfamuu danda\'u',
+    copyTableClipboard: 'Gabatee Garagalchi',
+    copiedToClipboard: 'Garee gabatee gara clipboardtti garagalfameera!',
+    openPrintWindow: 'Foddaa Maxxansaa Qulqulluu',
+    openPrintWindowDesc: 'Foddaa haaraa keessatti qulqullinaan banii maxxansi',
+    downloadCompleteDoc: 'Sanada Guutuu Buusi',
+    exportDailyCsvOption: 'Karoora Guyyaa (.csv)',
+    userManual: 'Qajeelfama Fayyadamaa',
+    userManualTitle: 'Qajeelfama Guutuu Appilikeeshinii Karoora Barnootaa',
+    userManualDesc: 'Akkaataa itti karoora waggaa fi guyyaa itti qopheessan, maxxansan, fi baasan.'
   },
 
   am: {
-    appTitle: 'የ2016 የትምህርት ዕቅድ',
+    appTitle: 'የ2019 የትምህርት ዕቅድ (2026/27)',
     appSubtitle: 'የ5ኛ ክፍል ሒሳብ ትምህርት (Mathematics Grade 5)',
     dailyView: 'የዕለት ዕቅድ',
     annualView: 'ዓመታዊ ዕቅድ',
@@ -339,7 +371,7 @@ export const translations: Record<Language, TranslationStrings> = {
     filter: 'አጣራ',
     all: 'ሁሉም',
     reset: 'ወደ ነበረበት መልስ',
-    confirmReset: 'ዓመታዊ የትምህርት ዕቅዱን ወደ 2016 ዓ.ም ትክክለኛ የመጀመሪያ ቅጂ መመለስ ይፈልጋሉ?',
+    confirmReset: 'ዓመታዊ የትምህርት ዕቅዱን ወደ ትክክለኛ የመጀመሪያ ቅጂ መመለስ ይፈልጋሉ?',
     resetSuccess: 'የትምህርት ዕቅዱ በተሳካ ሁኔታ ወደ ነበረበት ተመልሷል።',
     weekUpdateSuccess: 'የሳምንቱ ዕቅድ በተሳካ ሁኔታ ተሻሽሏል።',
     schoolInfoUpdateSuccess: 'የትምህርት ቤቱ መረጃ በተሳካ ሁኔታ ተሻሽሏል።',
@@ -410,16 +442,17 @@ export const translations: Record<Language, TranslationStrings> = {
     importFromAnnual: 'ከዓመታዊ ዕቅድ ውሰድ',
     addLesson: 'አዲስ ክፍለ ጊዜ ጨምር',
     noDailyLessons: 'የተመዘገበ የትምህርት ዕቅድ የለም',
-    noDailyLessonsDesc: 'ከ2016 ዓመታዊ ዕቅድ በቀጥታ ይቅዱ ወይም አዲስ የትምህርት ዝግጅት ያስገቡ።',
+    noDailyLessonsDesc: 'ከዓመታዊ ዕቅድ በቀጥታ ይቅዱ ወይም አዲስ የትምህርት ዝግጅት ያስገቡ።',
     prevDay: 'ያለፈው ቀን',
     nextDay: 'የሚቀጥለው ቀን',
     period: 'ክፍለ ጊዜ',
+    time: 'ሰዓት',
     activities: 'የትምህርት አሰጣጥ ሂደትና ዝርዝር ተግባራት (45 ደቂቃ)',
     notesTitle: 'የዕለቱ ማስታወሻና ክትትል',
     notesPlaceholder: 'የተማሪዎች ተሳትፎ፣ የቤት ሥራ፣ አስተያየት...',
     completed: 'ተጠናቋል',
     notCompleted: 'አልተጠናቀቀም',
-    selectWeekModalTitle: 'ከ2016 ዓመታዊ ዕቅድ ርዕስ ይምረጡ',
+    selectWeekModalTitle: 'ከዓመታዊ ዕቅድ ርዕስ ይምረጡ',
     selectWeekModalDesc: 'የሚፈልጉትን ሳምንታዊ ርዕስ በመምረጥ ወደ ዕለት ዕቅድ ይቅዱ።',
     selectBtn: 'ምረጥ',
     duration45Min: '(45 ደቂቃ)',
@@ -475,12 +508,27 @@ export const translations: Record<Language, TranslationStrings> = {
     printRunningHeaderNotice: 'ይህ ይፋዊ የትምህርት ቤት ራስጌ በሁሉም የታተሙ ገጾች ላይ በቋሚነት ይደገማል።',
     printDocumentAnnual: 'ዓመታዊ ዕቅድ (Annual Plan)',
     printDocumentDaily: 'የዕለት ዕቅድ (Daily Plan)',
-    curriculumFrameworkNotice: 'የ2016 ዓ.ም የኢትዮጵያ ሥርዓተ ትምህርት ማዕቀፍ (MoE / OEB Standard)',
-    pageHeaderTitle: 'ይፋዊ የህትመት ራስጌ'
+    curriculumFrameworkNotice: 'የ2019 ዓ.ም የኢትዮጵያ ሥርዓተ ትምህርት ማዕቀፍ (MoE / OEB Standard)',
+    pageHeaderTitle: 'ይፋዊ የህትመት ራስጌ',
+    exportWordOption: 'የዎርድ ሰነድ (.doc)',
+    exportWordDesc: 'በ Microsoft Word እና Google Docs በቀላሉ የሚስተካከል ቅርጸት',
+    exportExcelOption: 'የኤክሴል ሰንጠረዥ (.xls)',
+    exportExcelDesc: 'መስመርና ቀለማት የተስተካከሉለት የ Excel ፋይል',
+    exportHtmlOption: 'የድር ሰነድ (.html)',
+    exportHtmlDesc: 'ያለ ኢንተርኔት (Offline) የሚታይና የሚታተም ገጽ',
+    copyTableClipboard: 'ሰንጠረዡን ቅዳ',
+    copiedToClipboard: 'ሰንጠረዡ ወደ ቅንጥብ ሰሌዳ (Clipboard) ተቀድቷል!',
+    openPrintWindow: 'ንጹህ የህትመት መስኮት',
+    openPrintWindowDesc: 'በአዲስ ንጹህ ገጽ ከፍቶ ለማተም (iFrame ውጪ)',
+    downloadCompleteDoc: 'ሙሉውን ሰነድ አውርድ',
+    exportDailyCsvOption: 'የዕለት ዕቅድ (.csv)',
+    userManual: 'የአጠቃቀም መመሪያ',
+    userManualTitle: 'የዕቅድ ዝግጅት አፕሊኬሽን የተሟላ የተጠቃሚ መመሪያ',
+    userManualDesc: 'ዓመታዊና ዕለታዊ ዕቅድ ማዘጋጀት፣ ማተምና ወደ ተለያዩ ፋይሎች መላክ የሚያስችል መመሪያ።'
   },
 
   en: {
-    appTitle: 'Lesson Planner 2016',
+    appTitle: 'Lesson Planner 2019 (2026/27)',
     appSubtitle: 'Grade 5 Mathematics (Ethiopian Curriculum)',
     dailyView: 'Daily Plan',
     annualView: 'Annual Plan',
@@ -496,8 +544,8 @@ export const translations: Record<Language, TranslationStrings> = {
     filter: 'Filter',
     all: 'All',
     reset: 'Reset to Default',
-    confirmReset: 'Are you sure you want to reset the annual plan back to the official 2016 curriculum?',
-    resetSuccess: 'Annual plan successfully reset to default 2016 curriculum.',
+    confirmReset: 'Are you sure you want to reset the annual plan back to the official curriculum standard?',
+    resetSuccess: 'Annual plan successfully reset to default curriculum.',
     weekUpdateSuccess: 'Weekly plan updated successfully.',
     schoolInfoUpdateSuccess: 'School information updated successfully.',
 
@@ -567,16 +615,17 @@ export const translations: Record<Language, TranslationStrings> = {
     importFromAnnual: 'Import from Annual Plan',
     addLesson: 'Add New Lesson',
     noDailyLessons: 'No lessons scheduled for this day',
-    noDailyLessonsDesc: 'Quickly copy a topic from the 2016 Annual Curriculum or create a custom lesson.',
+    noDailyLessonsDesc: 'Quickly copy a topic from the Annual Curriculum or create a custom lesson.',
     prevDay: 'Previous Day',
     nextDay: 'Next Day',
     period: 'Period',
+    time: 'Time',
     activities: 'Lesson Procedure & Activities (45 Minutes)',
     notesTitle: 'Daily Notes & Observations',
     notesPlaceholder: 'Student participation, homework assignments, observations...',
     completed: 'Completed',
     notCompleted: 'Pending',
-    selectWeekModalTitle: 'Select Topic from 2016 Annual Curriculum',
+    selectWeekModalTitle: 'Select Topic from Annual Curriculum',
     selectWeekModalDesc: 'Select any week to auto-populate the 45-minute daily lesson plan.',
     selectBtn: 'Select',
     duration45Min: '(45 Mins)',
@@ -632,8 +681,23 @@ export const translations: Record<Language, TranslationStrings> = {
     printRunningHeaderNotice: 'This official institutional header automatically repeats at the top of every printed page.',
     printDocumentAnnual: 'Annual Scheme of Work (40 Weeks)',
     printDocumentDaily: 'Daily Lesson Plan',
-    curriculumFrameworkNotice: '2016 Ethiopian Curriculum Framework (MoE / OEB Standard)',
-    pageHeaderTitle: 'Official Running Print Header'
+    curriculumFrameworkNotice: '2019 E.C. (2026/27) Ethiopian Curriculum Framework (MoE / OEB Standard)',
+    pageHeaderTitle: 'Official Running Print Header',
+    exportWordOption: 'Word Document (.doc)',
+    exportWordDesc: 'Editable tabular document for Microsoft Word & Google Docs',
+    exportExcelOption: 'Excel Spreadsheet (.xls)',
+    exportExcelDesc: 'Formatted spreadsheet with styling, borders & columns',
+    exportHtmlOption: 'Standalone Webpage (.html)',
+    exportHtmlDesc: 'Offline-ready standalone printable webpage file',
+    copyTableClipboard: 'Copy Table',
+    copiedToClipboard: 'Table copied to clipboard!',
+    openPrintWindow: 'Clean Print Window',
+    openPrintWindowDesc: 'Opens in a new browser tab for clean full-page printing',
+    downloadCompleteDoc: 'Download Document',
+    exportDailyCsvOption: 'Daily Plan (.csv)',
+    userManual: 'User Manual',
+    userManualTitle: 'Comprehensive Lesson Planner User Manual & Guide',
+    userManualDesc: 'Complete guide for managing classes, planning lessons, printing, exporting, and backups.'
   }
 };
 
